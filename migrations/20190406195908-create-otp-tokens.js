@@ -15,6 +15,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
+      otp:{
+        type:DataTypes.STRING(8),
+        allowNull:false
+      },
       action: {
         type: Sequelize.TINYINT,
         allowNull: false,
@@ -28,7 +32,7 @@ module.exports = {
         allowNull: false,
         defaultValue: true
       },
-      valid_uptp: {
+      valid_upto: {
         type: Sequelize.DATE,
         allowNull: false
       },

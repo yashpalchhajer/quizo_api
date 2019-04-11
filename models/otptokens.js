@@ -1,7 +1,7 @@
 'use strict';
-const { TABLE_OTP_TOKENS } =  require('../config/dbConstant');
+const { TABLE_OTP_TOKENS } = require('../config/dbConstant');
 
-
+const dateFormat = require('dateformat');
 module.exports = (sequelize, DataTypes) => {
   const OTPTokens = sequelize.define(TABLE_OTP_TOKENS, {
     id: {
@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     player_id: {
       type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    otp: {
+      type: DataTypes.STRING(8),
       allowNull: false
     },
     action: {
@@ -27,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: true
     },
-    valid_uptp: {
+    valid_upto: {
       type: DataTypes.DATE,
       allowNull: false
     },
@@ -48,5 +52,79 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'player_id'
     });
   };
+
+  OTPTokens.generateOTP = (player, action) => {
+    return new Promise((resolve, reject) => {
+      let otp = Math.floor(Math.random() * Math.floor(process.env.OTP_LENTGH));
+      const validUpto = dateFormat('yyyy-mm-dd HH:MM:ss');
+
+      OTPTokens.create({
+        player_id: player.id,
+        otp: otp,
+        action: action,
+        retry_available: process.env.RETRY_AVAILABLE,
+        valid_upto: validUpto
+      }).then(otpToken => {
+        // console.log(otpToken);
+        resolve(otpToken.otp);
+      })
+        .catch(err => { console.log(err); reject(err) });
+
+    });
+  }
+
+  OTPTokens.checkOTP = (reqData,resend = false) => {
+    return new Promise((resolve, rejector) => {
+      let conditions = {};
+      if(resend){
+        conditions = {
+          player_id: reqData.player_id,
+          action: reqData.action,
+          is_valid: 1
+        };
+      }else{
+        conditions = {
+          player_id: reqData.player_id,
+          otp: reqData.otp,
+          action: reqData.action,
+          is_valid: 1
+        };
+      }
+
+      OTPTokens.findOne(
+        {
+          where: conditions
+        }
+      ).then(otpToken => {
+        resolve(otpToken)
+      })
+        .catch(err => {
+          console.log(err);
+          rejector(err)
+        });
+    })
+  }
+
+
+  OTPTokens.resendOTP = (player, action,retry) => {
+    return new Promise((resolve, reject) => {
+      let otp = Math.floor(Math.random() * Math.floor(process.env.OTP_LENTGH));
+      const validUpto = dateFormat('yyyy-mm-dd HH:MM:ss');
+
+      OTPTokens.create({
+        player_id: player.id,
+        otp: otp,
+        action: action,
+        retry_available: retry,
+        valid_upto: validUpto
+      }).then(otpToken => {
+        // console.log(otpToken);
+        resolve(otpToken.otp);
+      })
+        .catch(err => { console.log(err); reject(err) });
+
+    });
+  }
+
   return OTPTokens;
 };

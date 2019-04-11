@@ -1,5 +1,5 @@
 'use strict';
-const {TABLE_PLAYERS} = require('../config/dbConstant');
+const { TABLE_PLAYERS } = require('../config/dbConstant');
 
 
 module.exports = (sequelize, DataTypes) => {
@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    merchant_id:{
+    merchant_id: {
       type: DataTypes.INTEGER,
-      allowNull:false,
-      references: {model:'merchantmaster',key:'id'}
+      allowNull: false,
+      references: { model: 'merchantmaster', key: 'id' }
     },
     name: {
       type: DataTypes.STRING(50),
@@ -26,29 +26,29 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(12),
       allowNull: false
     },
-    gender:{
-      type: DataTypes.ENUM('M','F','T'),
-      allowNull:true
+    gender: {
+      type: DataTypes.ENUM('M', 'F', 'T'),
+      allowNull: true
     },
-    profile_img_url:{
+    profile_img_url: {
       type: DataTypes.TEXT,
-      allowNull:true
+      allowNull: true
     },
-    status:{
-      type: DataTypes.ENUM('ACTIVE','INACTIVE','TERMINATE'),
-      allowNull:false,
-      defaultValue:'ACTIVE'
+    status: {
+      type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'TERMINATE'),
+      allowNull: false,
+      defaultValue: 'ACTIVE'
     },
-    created_at: {
+    createdAt: {
       allowNull: false,
       type: DataTypes.DATE
     },
-    updated_at: {
+    updatedAt: {
       allowNull: false,
       type: DataTypes.DATE
     }
   }, {});
-  Players.associate = function(models) {
+  Players.associate = function (models) {
     Players.belongsTo(models.qa_merchant_masters, {
       through: 'merchants',
       as: 'player',
@@ -56,5 +56,44 @@ module.exports = (sequelize, DataTypes) => {
     });
     // associations can be defined here
   };
+
+  Players.checkPlayerExistance = (mobile) => {
+    return new Promise((resolve, rejector) => {
+      Players.findOne(
+        {
+          where: { contact_number: mobile }
+        }
+      ).then(player => {
+        console.log('Found');
+        resolve(player)
+      })
+      .catch(err => {
+        console.log(err);
+        rejector(err)
+      });
+    });
+  };
+
+  Players.register = (reqData) => {
+    return new Promise((resolve, reject) => {
+      let name = reqData.name;
+      let merchant_id = reqData.merchant_id;
+      let contact_number = reqData.contact_number;
+      let email = reqData.email || null;
+      let gender = reqData.gender || null;
+
+      Players.create({
+        name: name,
+        contact_number: contact_number,
+        merchant_id: merchant_id,
+        email: email,
+        gender: gender
+      })
+        .then((player) => {
+          resolve(player.get({ plain: true }));
+        }).catch(err => reject(err));
+    });
+  }
+
   return Players;
 };

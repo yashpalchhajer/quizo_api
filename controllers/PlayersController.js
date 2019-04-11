@@ -1,3 +1,5 @@
+'use strict';
+
 const Player = require('../models').qa_players;
 const Validator = require('validatorjs');
 const OTPToken = require('../models').qa_otp_tokens;

@@ -38,7 +38,7 @@ const getDeviceToken = async (req,res,next) => {
                     expiresIn: 86400
                 });
 
-                res.status(200).json({auth:true,token:token});
+                res.status(200).json({auth:true,deviceToken:token});
             }else{
                 res.status(405).json('Id or password incorrect');
             }

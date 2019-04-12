@@ -77,20 +77,20 @@ const verifyAuthOtp = async (req, res) => {
         const validator = new Validator(reqBody, rules);
 
         if (validator.fails()) {
-            res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
+            return res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
         }
 
         let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
 
         if (!playerData) {
-            res.status(400).json({ error: true, status: 'FAILED', message: "No player found with this mobile number" });
+            return res.status(400).json({ error: true, status: 'FAILED', message: "No player found with this mobile number" });
         }
 
         reqBody['player_id'] = playerData.id;
         const otpData = await OTPToken.checkOTP(reqBody);
 
         if (!otpData) {
-            res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
+            return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
         }
 
         otpData.update({ is_valid: false });
@@ -105,7 +105,7 @@ const verifyAuthOtp = async (req, res) => {
         const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
 
         if (diffMins > process.env.OTP_EXP_LIMIT) {
-            res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
+            return res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
         }
 
         let accesToken = await EncryptLib.getAccessToken(playerData);
@@ -125,9 +125,9 @@ const verifyAuthOtp = async (req, res) => {
             }
         };
 
-        res.status(200).json({ responseArr });
+        return res.status(200).json({ responseArr });
     } catch (err) {
-        res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while verifying OTP' });
+        return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while verifying OTP' });
     }
 
 }
@@ -142,19 +142,19 @@ const login = async (req, res) => {
         const validator = new Validator(reqBody, rules);
 
         if (validator.fails()) {
-            res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
+            return res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
         }
 
         let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
 
         if (!playerData) {
-            res.status(400).json({ error: true, status: 'FAILED', isRegistered: false, message: "No user found with given mobile number!", });
+            return res.status(400).json({ error: true, status: 'FAILED', isRegistered: false, message: "No user found with given mobile number!", });
         }
 
         let otp = await OTPToken.generateOTP(playerData, process.env.ACTION_LOGIN);
 
         if (!otp) {
-            res.status(400).json({ "error": "Error in OTP generation" });
+            return res.status(400).json({ "error": "Error in OTP generation" });
         }
 
         let respMessage = "Please enter OTP sent on " + reqBody.contact_number.substr(0, 3) + "****" + reqBody.contact_number.substr(7, 10) + " to continue.";
@@ -173,11 +173,11 @@ const login = async (req, res) => {
             }
         };
 
-        res.status(200).json(responseArr);
+        return res.status(200).json(responseArr);
 
     } catch (err) {
         console.log(err);
-        res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while registering' });
+        return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while registering' });
     }
 }
 
@@ -192,20 +192,20 @@ const resendOTP = async (req, res) => {
         const validator = new Validator(reqBody, rules);
 
         if (validator.fails()) {
-            res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
+            return res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
         }
 
         let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
 
         if (!playerData) {
-            res.status(400).json({ error: true, status: 'FAILED', message: "No player found with this mobile number" });
+            return res.status(400).json({ error: true, status: 'FAILED', message: "No player found with this mobile number" });
         }
 
         reqBody['player_id'] = playerData.id;
         const otpData = await OTPToken.checkOTP(reqBody,true);
         
         if (!otpData) {
-            res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
+            return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
         }
 
         otpData.update({ is_valid: false });
@@ -227,7 +227,7 @@ const resendOTP = async (req, res) => {
         let otp = await OTPToken.resendOTP(playerData, reqBody.action,retryAvailable - 1);
 
         if (!otp) {
-            res.status(400).json({ "error": "Error in OTP generation" });
+            return res.status(400).json({ "error": "Error in OTP generation" });
         }
 
         let respMessage = "Please enter OTP sent on " + reqBody.contact_number.substr(0, 3) + "****" + reqBody.contact_number.substr(7, 10) + " to continue.";
@@ -245,11 +245,11 @@ const resendOTP = async (req, res) => {
             }
         };
 
-        res.status(200).json(responseArr);
+        return res.status(200).json(responseArr);
 
     } catch (err) {
         console.log(err);
-        res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while registering' });
+        return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while registering' });
     }
 }
 

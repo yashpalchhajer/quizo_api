@@ -2,6 +2,8 @@
 
 const jwt = require('jsonwebtoken');
 // const bcrypt = require('bcryptjs');
+const MerchantMaster = require('../models').qa_merchant_masters;
+const Player = require('../models').qa_players;
 
 
 
@@ -15,7 +17,7 @@ const getAccessToken = (player) => {
             {
                 player_id:player.id,
                 contact:player.contact_number
-            },'123456',{
+            },player.contact_number,{
             expiresIn: 86400
         });
 
@@ -23,6 +25,50 @@ const getAccessToken = (player) => {
     });
 }
 
+const VerifyDeviceToken = (token,merchantId) => {
+    return new Promise((resolve,reject) => {
+        MerchantMaster.findOne({
+            where:{id:merchantId,status:'ACTIVE'}
+        }).then(merchant => {
+            jwt.verify(token,merchant.api_key,(err,decoded) => {
+                if(err){
+                    reject(err);
+                }
+                resolve(decoded.merchantId);
+            });
+        }).catch(error => {
+            reject(error);
+        })
+
+    })
+}
+
+const VerifyAccessToken = (token,contact_number) => {
+    return new Promise((resolve,reject) => {
+        Player.findOne({
+            where:{contact_number:contact_number,status:'ACTIVE'}
+        }).then(player => {
+
+            if(!player){
+                reject(false);
+            }
+
+            jwt.verify(token,player.contact_number,(err,decoded) => {
+                if(err){
+                    reject(err);
+                }
+                resolve(player.id);
+            });
+        }).catch(error => {
+            reject(error);
+        })
+    })
+}
+
+
+
 module.exports = {
-    getAccessToken
+    getAccessToken,
+    VerifyDeviceToken,
+    VerifyAccessToken
 }

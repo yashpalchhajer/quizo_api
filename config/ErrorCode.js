@@ -1,3 +1,4 @@
+'use strict';
 const VALIDATION_ERROR_CODE = 400;
 
 module.exports = {

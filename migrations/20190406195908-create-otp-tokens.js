@@ -16,7 +16,7 @@ module.exports = {
         allowNull: false
       },
       otp:{
-        type:DataTypes.STRING(8),
+        type:Sequelize.STRING(8),
         allowNull:false
       },
       action: {

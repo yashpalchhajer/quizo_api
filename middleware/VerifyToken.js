@@ -1,3 +1,4 @@
+'use strict';
 const jwt = require('jsonwebtoken');
 
 const MerchantMaster = require('../models').qa_merchant_masters;

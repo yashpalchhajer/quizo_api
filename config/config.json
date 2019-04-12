@@ -1,9 +1,9 @@
 {
   "development": {
     "username": "root",
-    "password": "12345678",
+    "password": "quizo@yash1994",
     "database": "quizo_api",
-    "host": "127.0.0.1",
+    "host": "35.229.239.155",
     "dialect": "mysql"
   }
 }

@@ -24,7 +24,7 @@ const register = async (req, res) => {
 
         const validator = new Validator(reqBody, rules);
         if (validator.fails()) {
-            res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
+            return res.status(400).json({ error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors });
         }
 
         let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
@@ -40,16 +40,16 @@ const register = async (req, res) => {
         let otp = await OTPToken.generateOTP(playerData, process.env.ACTION_REGISTER);
 
         if (!otp) {
-            res.status(400).json({ "error": "Error in OTP generation" });
+            return res.status(400).json({ error: true, status: 'FAILED', message: "Error in OTP generation" });
         }
 
-        if(process.env.NODE_ENV == 'development'){
+        if(process.env.NODE_ENV != 'production'){
             respMessage = respMessage + " [" + otp + "]";
         }
 
         let responseArr = {
             "error": false,
-            "success": "SUCCESS",
+            "status":"SUCCESS",
             "data": {
                 "isRegistered": isRegistered,
                 "message": respMessage,
@@ -57,11 +57,11 @@ const register = async (req, res) => {
             }
         };
 
-        res.status(200).json(responseArr);
+        return res.status(200).json(responseArr);
         /** if user not exists then register and send otp */
 
     } catch (error) {
-        res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while registering' });
+        return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured during registration' });
     }
 }
 
@@ -112,7 +112,7 @@ const verifyAuthOtp = async (req, res) => {
 
         let responseArr = {
             "error": false,
-            "success": "SUCCESS",
+            "status": "SUCCESS",
             "data": {
                 "player": {
                     "name": playerData.name,
@@ -148,7 +148,17 @@ const login = async (req, res) => {
         let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
 
         if (!playerData) {
-            return res.status(400).json({ error: true, status: 'FAILED', isRegistered: false, message: "No user found with given mobile number!", });
+
+            let responseArr = {
+                "error": false,
+                "status":"SUCCESS",
+                "data": {
+                    "isRegistered": false,
+                    "message": "No user found with given mobile number!"
+                }
+            };
+
+            return res.status(400).json(responseArr);
         }
 
         let otp = await OTPToken.generateOTP(playerData, process.env.ACTION_LOGIN);
@@ -159,13 +169,13 @@ const login = async (req, res) => {
 
         let respMessage = "Please enter OTP sent on " + reqBody.contact_number.substr(0, 3) + "****" + reqBody.contact_number.substr(7, 10) + " to continue.";
 
-        if(process.env.NODE_ENV == 'development'){
+        if(process.env.NODE_ENV != 'production'){
             respMessage = respMessage + " [" + otp + "]";
         }
 
         let responseArr = {
             "error": false,
-            "success": "SUCCESS",
+            "status":"SUCCESS",
             "data": {
                 "isRegistered": true,
                 "message": respMessage,
@@ -176,8 +186,7 @@ const login = async (req, res) => {
         return res.status(200).json(responseArr);
 
     } catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while registering' });
+        return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while Login' });
     }
 }
 
@@ -227,18 +236,18 @@ const resendOTP = async (req, res) => {
         let otp = await OTPToken.resendOTP(playerData, reqBody.action,retryAvailable - 1);
 
         if (!otp) {
-            return res.status(400).json({ "error": "Error in OTP generation" });
+            return res.status(401).json({ error: true, status: 'FAILED', message: "Some error occured while OTP generation" });
         }
 
         let respMessage = "Please enter OTP sent on " + reqBody.contact_number.substr(0, 3) + "****" + reqBody.contact_number.substr(7, 10) + " to continue.";
 
-        if(process.env.NODE_ENV == 'development'){
+        if(process.env.NODE_ENV != 'production'){
             respMessage = respMessage + " [" + otp + "]";
         }
 
         let responseArr = {
             "error": false,
-            "success": "SUCCESS",
+            "status":"SUCCESS",
             "data": {
                 "message": respMessage,
                 "action": reqBody.action
@@ -248,7 +257,6 @@ const resendOTP = async (req, res) => {
         return res.status(200).json(responseArr);
 
     } catch (err) {
-        console.log(err);
         return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while registering' });
     }
 }

@@ -1,4 +1,5 @@
-'use strict';
+"use strict";
+
 const PREFIX = 'qa_';
 
 const TABLE_MERCHANT_MASTER = PREFIX+'merchant_masters';

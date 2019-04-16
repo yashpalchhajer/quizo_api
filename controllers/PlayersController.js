@@ -43,13 +43,13 @@ const register = async (req, res) => {
             return res.status(400).json({ error: true, status: 'FAILED', message: "Error in OTP generation" });
         }
 
-        if(process.env.NODE_ENV != 'production'){
+        if (process.env.NODE_ENV != 'production') {
             respMessage = respMessage + " [" + otp + "]";
         }
 
         let responseArr = {
             "error": false,
-            "status":"SUCCESS",
+            "status": "SUCCESS",
             "data": {
                 "isRegistered": isRegistered,
                 "message": respMessage,
@@ -87,25 +87,27 @@ const verifyAuthOtp = async (req, res) => {
         }
 
         reqBody['player_id'] = playerData.id;
-        const otpData = await OTPToken.checkOTP(reqBody);
+        if (process.env.NODE_ENV != 'production') {
+            const otpData = await OTPToken.checkOTP(reqBody);
 
-        if (!otpData) {
-            return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
-        }
+            if (!otpData) {
+                return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
+            }
 
-        otpData.update({ is_valid: false });
+            otpData.update({ is_valid: false });
 
 
-        /** get date dfference 
-         * NEED TO ADD IN LIBRARY
-        */
-        const generateTime = otpData.createdAt;
-        const current = new Date();
-        const diffMs = (current - generateTime); // milliseconds between now & Christmas
-        const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+            /** get date dfference 
+             * NEED TO ADD IN LIBRARY
+            */
+            const generateTime = otpData.createdAt;
+            const current = new Date();
+            const diffMs = (current - generateTime); // milliseconds between now & Christmas
+            const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
 
-        if (diffMins > process.env.OTP_EXP_LIMIT) {
-            return res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
+            if (diffMins > process.env.OTP_EXP_LIMIT) {
+                return res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
+            }
         }
 
         let accesToken = await EncryptLib.getAccessToken(playerData);
@@ -151,7 +153,7 @@ const login = async (req, res) => {
 
             let responseArr = {
                 "error": false,
-                "status":"SUCCESS",
+                "status": "SUCCESS",
                 "data": {
                     "isRegistered": false,
                     "message": "No user found with given mobile number!"
@@ -169,13 +171,13 @@ const login = async (req, res) => {
 
         let respMessage = "Please enter OTP sent on " + reqBody.contact_number.substr(0, 3) + "****" + reqBody.contact_number.substr(7, 10) + " to continue.";
 
-        if(process.env.NODE_ENV != 'production'){
+        if (process.env.NODE_ENV != 'production') {
             respMessage = respMessage + " [" + otp + "]";
         }
 
         let responseArr = {
             "error": false,
-            "status":"SUCCESS",
+            "status": "SUCCESS",
             "data": {
                 "isRegistered": true,
                 "message": respMessage,
@@ -211,10 +213,10 @@ const resendOTP = async (req, res) => {
         }
 
         reqBody['player_id'] = playerData.id;
-        const otpData = await OTPToken.checkOTP(reqBody,true);
-        
+        const otpData = await OTPToken.checkOTP(reqBody, true);
+
         if (!otpData) {
-            return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
+            return res.status(401).json({ error: true, status: 'FAILED', message: "There no recent active OTP found with player. Please click on send OTP." });
         }
 
         otpData.update({ is_valid: false });
@@ -228,12 +230,12 @@ const resendOTP = async (req, res) => {
         const current = new Date();
         const diffMs = (current - generateTime); // milliseconds between now & Christmas
         const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
-        
+
         if (retryAvailable <= 0 && diffMins <= 60) {
             res.status(401).json({ error: true, status: 'FAILED', message: "You have reached max retry. please try after few hours" });
         }
 
-        let otp = await OTPToken.resendOTP(playerData, reqBody.action,retryAvailable - 1);
+        let otp = await OTPToken.resendOTP(playerData, reqBody.action, retryAvailable - 1);
 
         if (!otp) {
             return res.status(401).json({ error: true, status: 'FAILED', message: "Some error occured while OTP generation" });
@@ -241,13 +243,13 @@ const resendOTP = async (req, res) => {
 
         let respMessage = "Please enter OTP sent on " + reqBody.contact_number.substr(0, 3) + "****" + reqBody.contact_number.substr(7, 10) + " to continue.";
 
-        if(process.env.NODE_ENV != 'production'){
+        if (process.env.NODE_ENV != 'production') {
             respMessage = respMessage + " [" + otp + "]";
         }
 
         let responseArr = {
             "error": false,
-            "status":"SUCCESS",
+            "status": "SUCCESS",
             "data": {
                 "message": respMessage,
                 "action": reqBody.action

@@ -22,4 +22,6 @@ router.post('/register-otp', verifyDeviceToken,PlayerController.verifyAuthOtp);
 router.post('/login', verifyDeviceToken, PlayerController.login);
 router.post('/resend-otp', PlayerController.resendOTP, verifyDeviceToken);
 
+
+
 module.exports = router;

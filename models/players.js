@@ -54,6 +54,13 @@ module.exports = (sequelize, DataTypes) => {
       as: 'player',
       foreignKey: 'merchant_id'
     });
+
+  /*   Players.belongToMany(models.qa_players_availables,{
+      through: 'playeravailbles',
+      as: 'availability',
+      foreignKey: 'id'
+    }); */
+
     // associations can be defined here
   };
 

@@ -6,11 +6,6 @@ const MerchantMaster = require('../models').qa_merchant_masters;
 const Player = require('../models').qa_players;
 
 
-
-const getDeviceToken = async () => {
-
-}
-
 const getAccessToken = (player) => {
     return new Promise((resolve,reject) => {
         let token = jwt.sign(

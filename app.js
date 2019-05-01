@@ -36,9 +36,16 @@ app.use(function (req, res, next) {
 
 let io = require('socket.io')();
 app.io = io;
-
-io.on('connection',function(socket){
+global.io = io;
+global.io.on('connection',function(socket){
     console.log('conn establish');
+
+    socket.on('joinRoom',function(data){
+        console.log('event fired');
+        console.log(data);
+    });
+
+
 });
 
 /// error handlers

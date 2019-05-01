@@ -8,7 +8,7 @@ const MerchanController = require('../controllers').MerchantController;
 const PlayerController = require('../controllers').PlayerController;
 /* GET home page. */
 router.get('/', function (req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Express' });  
 });
 
 router.post('/getToken', MerchanController.getDeviceToken);

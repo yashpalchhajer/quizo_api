@@ -82,6 +82,58 @@ module.exports = (sequelize, DataTypes) => {
 
   }
 
+  PlayerAvailable.fetchFreePlayersQuizWise = (quizId) => {
+    return new Promise((resolve, reject) => {
+      PlayerAvailable.findAndCountAll(
+        {
+          where: {
+            quiz_id: quizId,
+            is_free: TRUE,
+            team_id: NULL
+          }
+        }
+      ).then(playerAvailable => {
+        resolve(playerAvailable);
+      }).catch(err => {
+        reject(err);
+      });
+    });
+  }
+
+  PlayerAvailable.updatePlayersToBusy = (playerData) => {
+    return new Promise((resolve, reject) => {
+      PlayerAvailable.bulkUpdate(TABLE_PLAYER_AVAILABLE, { is_free : "FALSE" },playerData)
+      .then(playerAvailable => {
+        resolve(playerAvailable);
+      }).catch(err => {
+        reject(err);
+      });
+    });
+  }
+
+  PlayerAvailable.registerPlayerRequest = (playerId,quizId) => {
+    return new Promise((resolve, reject) => {
+      PlayerAvailable.findOrCreate({
+        where : {
+          player_id: playerId,
+          is_free: TRUE,
+          team_id: NULL,
+          quiz_id : quizId
+        },
+        defaults : {
+          player_id: playerId,
+          is_free: TRUE,
+          team_id: NULL,
+          quiz_id : quizId
+        }
+      })
+      .then(playerAvailable => {
+        resolve(playerAvailable);
+      }).catch(err => {
+        reject(err);
+      });
+    });
+  }
 
   return PlayerAvailable;
 };

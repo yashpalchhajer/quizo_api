@@ -47,5 +47,15 @@ module.exports = (sequelize, DataTypes) => {
   QuizTeams.associate = function (models) {
     // associations can be defined here
   };
+
+  QuizTeams.registerNewTeam = (reqData) => {
+    return new Promise((resolve, reject) => {
+      QuizTeams.bulkInsert(TABLE_QUIZ_TEAM,reqData)
+      .then((player) => {
+          resolve(player.get({ plain: true }));
+      }).catch(err => reject(err));
+    });
+  }
+
   return QuizTeams;
 };

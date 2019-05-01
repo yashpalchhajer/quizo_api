@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       references: { model: 'players', key: 'id' }
     },
     is_free: {
-      type: DataTypes.ENUM('TRUE', 'FALSE'),
+      type: DataTypes.ENUM('true', 'FALSE'),
       defaultValue: true,
     },
     quiz_id: {
@@ -24,8 +24,8 @@ module.exports = (sequelize, DataTypes) => {
       references: { model: 'quizconfigs', key: 'id' }
     },
     team_id: {
-      type: DataTypes.INTEGER(11),
-      allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: true,
       references: { model: 'quizteams', key: 'id' }
     },
     createdAt: {
@@ -69,18 +69,18 @@ module.exports = (sequelize, DataTypes) => {
         {
           where: {
             player_id: player.id,
-            is_free: TRUE,
-            team_id: NULL
+            is_free: true,
+            team_id: null
           }
         }
-      ).then(playerAvailable => {
-        resolve(playerAvailable);
+      ).then(player => {
+        resolve(player);
       }).catch(err => {
         reject(err);
       });
     });
 
-  }
+  };
 
   PlayerAvailable.fetchFreePlayersQuizWise = (quizId) => {
     return new Promise((resolve, reject) => {
@@ -88,8 +88,8 @@ module.exports = (sequelize, DataTypes) => {
         {
           where: {
             quiz_id: quizId,
-            is_free: TRUE,
-            team_id: NULL
+            is_free: true,
+            team_id: null
           }
         }
       ).then(playerAvailable => {
@@ -98,42 +98,50 @@ module.exports = (sequelize, DataTypes) => {
         reject(err);
       });
     });
-  }
+  };
 
   PlayerAvailable.updatePlayersToBusy = (playerData) => {
     return new Promise((resolve, reject) => {
-      PlayerAvailable.bulkUpdate(TABLE_PLAYER_AVAILABLE, { is_free : "FALSE" },playerData)
-      .then(playerAvailable => {
-        resolve(playerAvailable);
-      }).catch(err => {
-        reject(err);
-      });
+      // PlayerAvailable.bulkUpdate(TABLE_PLAYER_AVAILABLE, { is_free: "FALSE" }, playerData)
+      //   .then(playerAvailable => {
+      //     resolve(playerAvailable);
+      //   }).catch(err => {
+      //     reject(err);
+      //   });
     });
-  }
+  };
 
-  PlayerAvailable.registerPlayerRequest = (playerId,quizId) => {
+  PlayerAvailable.registerPlayerRequest = (playerId, quizId) => {
     return new Promise((resolve, reject) => {
-      PlayerAvailable.findOrCreate({
-        where : {
-          player_id: playerId,
-          is_free: TRUE,
-          team_id: NULL,
-          quiz_id : quizId
-        },
-        defaults : {
-          player_id: playerId,
-          is_free: TRUE,
-          team_id: NULL,
-          quiz_id : quizId
+      PlayerAvailable.findOne({
+        where: {
+         player_id: playerId,
+          is_free: true,
+          team_id: null,
+          quiz_id: quizId
         }
       })
-      .then(playerAvailable => {
-        resolve(playerAvailable);
-      }).catch(err => {
-        reject(err);
-      });
+        .then(playerAvailable => {
+
+          if (!playerAvailable) {
+            PlayerAvailable.create({
+              player_id: playerId,
+              is_free: true,
+              quiz_id: quizId
+            }).then(available => {
+              resolve(available);
+            }).catch(err => { console.log(err); reject(err) });
+
+          } else {
+            resolve(playerAvailable);
+          }
+
+        }).catch(err => {
+          console.log(err);
+          reject(err);
+        });
     });
-  }
+  };
 
   return PlayerAvailable;
 };

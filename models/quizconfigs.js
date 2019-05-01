@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
   };
 
-  QuizConfigs.checkExistance = (quiz) => {
+  QuizConfigs.checkExistance = (quizId) => {
     return new Promise((resolve, reject) => {
       QuizConfigs.findOne(
         {

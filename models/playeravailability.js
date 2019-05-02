@@ -1,5 +1,7 @@
 'use strict';
 const { TABLE_PLAYER_AVAILABLE } = require('../config/dbConstant');
+const CustomError = require('../libraries/customError');
+const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   const PlayerAvailable = sequelize.define(TABLE_PLAYER_AVAILABLE, {
@@ -100,22 +102,33 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  PlayerAvailable.updatePlayersToBusy = (playerData) => {
+  PlayerAvailable.updatePlayersWithTeam = (playerIds, quizId, status, teamId) => {
     return new Promise((resolve, reject) => {
-      // PlayerAvailable.bulkUpdate(TABLE_PLAYER_AVAILABLE, { is_free: "FALSE" }, playerData)
-      //   .then(playerAvailable => {
-      //     resolve(playerAvailable);
-      //   }).catch(err => {
-      //     reject(err);
-      //   });
+      PlayerAvailable.update({
+        is_free: status,
+        team_id: teamId
+      }, {
+        where: {
+          player_id: { [Sequelize.Op.in]: playerIds },
+          quiz_id: quizId,
+          is_free: "TRUE"
+        }
+      }).then(updateCount => {
+        if(updateCount[0] != playerIds.length)
+          throw new CustomError("All players not updated to busy");
+        resolve(updateCount);
+      }).catch(err => {
+        console.log(err);
+        reject(err);
+      });
     });
-  };
+  }
 
   PlayerAvailable.registerPlayerRequest = (playerId, quizId) => {
     return new Promise((resolve, reject) => {
       PlayerAvailable.findOne({
         where: {
-         player_id: playerId,
+          player_id: playerId,
           is_free: true,
           team_id: null,
           quiz_id: quizId

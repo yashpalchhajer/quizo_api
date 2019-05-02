@@ -10,9 +10,8 @@ const TeamBuilder = async (req) => {
     try {
 
         const quizDetails = await quizConfigs.checkExistance(req.quizId);
-
-        /** check is quiz null */
-
+        if(!quizDetails)
+            throw new CustomError("Invalid Quiz");
         if ("ACTIVE" == quizDetails.status) {
             await playerAvailability.registerPlayerRequest(req.playerId, req.quizId);
             const availablePlayersList = await playerAvailability.fetchFreePlayersQuizWise(req.quizId);
@@ -21,36 +20,41 @@ const TeamBuilder = async (req) => {
             else if (availablePlayersList.count < quizDetails.min_members)
                 throw new CustomError("No minimum members");
             else {
-                let teamId = "xyz" + Math.floor(Math.random() * 99);
+                let teamId = req.quizId + Date.now();
+                console.log(teamId);
                 const teamData = [];
                 const updatePlayer = [];
+                const responsePlayerData = [];
                 availablePlayersList.rows.forEach(player => {
                     let teamPlayer = {
                         player_id: player.player_id,
                         quiz_id: req.quizId,
                         team_id: teamId
                     };
-                    let playerAva = {
-                        player_id: player.player_id,
-                        quiz_id: req.quizId,
-                        is_free: "FALSE"
+                    let playerData = {
+                        playerId: player.player_id
                     }
-                    player.update({is_free:"FALSE"});
+                    responsePlayerData.push(playerData);
+                    updatePlayer.push(player.player_id);
                     teamData.push(teamPlayer);
-                });
+                })
+                await playerAvailability.updatePlayersWithTeam(updatePlayer, req.quizId, "FALSE", teamId);
                 await quizTeam.registerNewTeam(teamData);
-
-                return { error: false, status: "TRUE", message: "Team Successfully Generated" };
+                let responseData = {
+                    teamId: teamId,
+                    players: responsePlayerData
+                }
+                return { error: false, status: "TRUE", message: "Team Successfully Generated", data: responseData};
             }
         } else {
             throw new CustomError("Quiz Not Active");
         }
     } catch (error) {
         if (error instanceof CustomError) {
-            return { error: true, status: "FAILED", message: error.message };
+            return { error: false, status: "FAILED", message: error.message };
         } else {
             console.log(error);
-            return { error: true, status: "FAILED", message: "Exception in team generation" + error.message };
+            return { error: true, status: "FAILED", message: "Exception in team generation " + error.message };
         }
     }
 }

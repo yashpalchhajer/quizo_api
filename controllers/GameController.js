@@ -1,7 +1,8 @@
 'use strict';
 const Player = require('../models').qa_players;
-const Validator = require('validator');
-const PlayerAvailability = require('../models').qa_player_availables;
+const Validator = require('validatorjs');
+const PlayerAvailability = require('../models').qa_players_availables;
+const TeamBuilder = require('../libraries/TeamBuilder');
 
 const requstToPlay = async (req, res) => {
     let reqBody = req.body;
@@ -33,10 +34,18 @@ const requstToPlay = async (req, res) => {
 
     /** check player availability and make team to play */
 
-    
+    let reqdata = {
+        playerId: playerData.id,
+        quizId: reqBody.quiz_id
+    };
 
+    let teamResp = await TeamBuilder(reqdata);
 
+    return res.status(200).json(teamResp);
 
 }
 
 
+module.exports = {
+    requstToPlay
+}

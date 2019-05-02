@@ -1,39 +1,44 @@
 'use strict';
-const {TABLE_QUIZ_TEAM} = require('../config/dbConstant');
+const { TABLE_QUIZ_TEAM } = require('../config/dbConstant');
 
 module.exports = (sequelize, DataTypes) => {
-  const QuizTeams = sequelize.define('QuizTeams', {
+  const QuizTeams = sequelize.define(TABLE_QUIZ_TEAM, {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },    
     team_id: {
       allowNull: false,
       type: DataTypes.STRING
     },
-    player_id:{
+    player_id: {
       type: DataTypes.INTEGER(11),
-      allowNull:false,
-      references:{
-        model:'players',
+      allowNull: false,
+      references: {
+        model: 'players',
         key: 'id'
       },
-      onDelete:'restrict',
+      onDelete: 'restrict',
       onUpdate: ' no action'
     },
-    quiz_id:{
+    quiz_id: {
       type: DataTypes.INTEGER(11),
-      allowNull:false,
-      references:{
-        model: 'quizconfigs', 
+      allowNull: false,
+      references: {
+        model: 'quizconfigs',
         key: 'id'
       },
       onDelete: 'restrict',
       onUpdate: 'no action'
     },
-    questions:{
+    questions: {
       type: DataTypes.JSON,
-      allowNull:true,
+      allowNull: true,
     },
-    final_score:{
+    final_score: {
       type: DataTypes.STRING,
-      allowNull:true
+      allowNull: true
     },
     createdAt: {
       allowNull: false,
@@ -47,5 +52,15 @@ module.exports = (sequelize, DataTypes) => {
   QuizTeams.associate = function (models) {
     // associations can be defined here
   };
+
+  QuizTeams.registerNewTeam = (reqData) => {
+    return new Promise((resolve, reject) => {
+      QuizTeams.bulkCreate(reqData)
+        .then((player) => {
+          resolve(player);
+        }).catch(err => reject(err));
+    });
+  }
+
   return QuizTeams;
 };

@@ -5,6 +5,12 @@ const { TABLE_PLAYERS } = require('../config/dbConstant');
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable(TABLE_QUIZ_TEAM, {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
       team_id: {
         allowNull: false,
         type: Sequelize.STRING

@@ -44,7 +44,7 @@ const requestToPlay = async (req) => {
     let reqdata = {
         playerId: playerData.id,
         quizId: reqBody.quiz_id,
-        connection_id: reqBody.socket_id
+        connectionId: reqBody.socket_id
     };
 
     let teamResp = await TeamBuilder(reqdata);

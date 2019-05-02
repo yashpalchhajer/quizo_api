@@ -112,52 +112,37 @@ module.exports = (sequelize, DataTypes) => {
         is_free: status,
         team_id: teamId
       }, {
-        where: {
-          player_id: { [Sequelize.Op.in]: playerIds },
-          quiz_id: quizId,
-          is_free: "TRUE"
-        }
-      }).then(updateCount => {
-        if(updateCount[0] != playerIds.length)
-          throw new CustomError("All players not updated to busy");
-        resolve(updateCount);
-      }).catch(err => {
-        console.log(err);
-        reject(err);
-      });
-    });
-  }
-
-  PlayerAvailable.registerPlayerRequest = (playerId, quizId, connection_id) => {
-    return new Promise((resolve, reject) => {
-      PlayerAvailable.findOne({
-        where: {
-          player_id: playerId,
-          is_free: true,
-          team_id: null,
-          quiz_id: quizId
-        }
-      })
-        .then(playerAvailable => {
-
-          if (!playerAvailable) {
-            PlayerAvailable.create({
-              player_id: playerId,
-              is_free: true,
-              quiz_id: quizId,
-              connection_id: connection_id
-            }).then(available => {
-              resolve(available);
-            }).catch(err => { console.log(err); reject(err) });
-
-          } else {
-            resolve(playerAvailable);
+          where: {
+            player_id: { [Sequelize.Op.in]: playerIds },
+            quiz_id: quizId,
+            is_free: "TRUE"
           }
-
+        }).then(updateCount => {
+          if (updateCount[0] != playerIds.length)
+            throw new CustomError("All players not updated to busy");
+          resolve(updateCount);
         }).catch(err => {
           console.log(err);
           reject(err);
         });
+    });
+  }
+
+  PlayerAvailable.registerPlayerRequest = (playerId, quizId, connectionId) => {
+    return new Promise((resolve, reject) => {
+      PlayerAvailable.findOrCreate({
+        where: {
+          player_id: playerId,
+          is_free: true,
+          team_id: null,
+          quiz_id: quizId,
+          connection_id: connectionId
+        }
+      }).then(player => resolve(player))
+      .catch(error => {
+        console.log(error);
+        reject(error);
+      });
     });
   };
 

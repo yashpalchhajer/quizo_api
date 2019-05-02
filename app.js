@@ -34,19 +34,6 @@ app.use(function (req, res, next) {
 });
 
 
-let io = require('socket.io')();
-app.io = io;
-global.io = io;
-global.io.on('connection',function(socket){
-    console.log('conn establish');
-
-    socket.on('joinRoom',function(data){
-        console.log('event fired');
-        console.log(data);
-    });
-
-
-});
 
 /// error handlers
 
@@ -71,6 +58,38 @@ app.use(function (err, req, res, next) {
         error: {}
     });
 });
+
+let GameController = require('./controllers/GameController');
+// console.log(GameController);
+let io = require('socket.io')();
+app.io = io;
+global.io = io;
+
+global.io.on('connection',function(socket){
+    console.log('conn establish');
+
+    socket.on('joinRoom',function(data){
+        console.log('event fired');
+        console.log(data);
+    });
+
+    socket.on('requestToPlay',function(request){
+        if(request.hasOwnProperty('contact_number')){
+            request.socket_id = socket.id;
+            GameController.requestToPlay(request);
+        }
+    });
+
+
+});
+
+
+global.io.on('disconnect',function(socket){
+    
+
+});
+
+
 
 
 module.exports = app;

@@ -10,6 +10,7 @@ const GamePlayer = require('../controllers/GameController');
 
 /* GET home page. */
 router.get('/', function (req, res) {
+  global.io.emit('assignRoom','dsd');
   res.render('index', { title: 'Express' });  
 });
 
@@ -24,7 +25,7 @@ router.post('/register-otp', verifyDeviceToken,PlayerController.verifyAuthOtp);
 router.post('/login', verifyDeviceToken, PlayerController.login);
 router.post('/resend-otp', PlayerController.resendOTP, verifyDeviceToken);
 
-router.post('/requstToPlay',GamePlayer.requstToPlay);
+// router.post('/requstToPlay',GamePlayer.requstToPlay);
 
 
 module.exports = router;

@@ -30,6 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       references: { model: 'quizteams', key: 'id' }
     },
+    connection_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
@@ -124,7 +128,7 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
-  PlayerAvailable.registerPlayerRequest = (playerId, quizId) => {
+  PlayerAvailable.registerPlayerRequest = (playerId, quizId, connection_id) => {
     return new Promise((resolve, reject) => {
       PlayerAvailable.findOne({
         where: {
@@ -140,7 +144,8 @@ module.exports = (sequelize, DataTypes) => {
             PlayerAvailable.create({
               player_id: playerId,
               is_free: true,
-              quiz_id: quizId
+              quiz_id: quizId,
+              connection_id: connection_id
             }).then(available => {
               resolve(available);
             }).catch(err => { console.log(err); reject(err) });

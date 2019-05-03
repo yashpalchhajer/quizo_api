@@ -1,6 +1,5 @@
 'use strict';
 
-// const playerAvailability = require('../models').qa_player_availables;
 const playerAvailability = require('../models').qa_players_availables;
 const quizConfigs = require('../models').qa_quiz_configs;
 const quizTeam = require('../models').qa_quiz_teams;
@@ -32,7 +31,8 @@ const TeamBuilder = async (req) => {
                     };
                     let playerData = {
                         playerId: player.player_id,
-                        connectionId: player.connection_id
+                        connectionId: player.connection_id,
+                        name: player.name
                     }
                     responsePlayerData.push(playerData);
                     updatePlayer.push(player.player_id);

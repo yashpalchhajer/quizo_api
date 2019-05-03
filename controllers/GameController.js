@@ -14,7 +14,6 @@ const requestToPlay = async (req) => {
         contact_number: 'required|min:10|max:10',
         quiz_id: 'required|numeric'
     };
-    console.log(reqBody);
 
     let validator = new Validator(reqBody, rules);
     if (validator.fails()) {
@@ -50,18 +49,15 @@ const requestToPlay = async (req) => {
     let teamResp = await TeamBuilder(reqdata);
 
     if(teamResp.hasOwnProperty('error') && teamResp.error == false && teamResp.hasOwnProperty('status') && teamResp.status == true){
-
         if(teamResp.hasOwnProperty('data')){
             teamResp.data.players.forEach((player) => {
-                console.log(global.io.sockets.connected[player.connection_id]);
-                global.io.sockets.connected[player.connection_id].emit('teamResp',player);
+                global.io.sockets.connected[player.connectionId].emit('teamResp',player);
             });
         }
     }
 
 
     console.log(teamResp);
-    console.log(teamResp.data.players);
     // return res.status(200).json(teamResp);
     // console.log(global.io.sockets.connected);
 

@@ -1,5 +1,7 @@
 'use strict';
 const { TABLE_PLAYER_AVAILABLE } = require('../config/dbConstant');
+const CustomError = require('../libraries/customError');
+const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   const PlayerAvailable = sequelize.define(TABLE_PLAYER_AVAILABLE, {
@@ -15,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       references: { model: 'players', key: 'id' }
     },
     is_free: {
-      type: DataTypes.ENUM('TRUE', 'FALSE'),
+      type: DataTypes.ENUM('true', 'FALSE'),
       defaultValue: true,
     },
     quiz_id: {
@@ -24,9 +26,13 @@ module.exports = (sequelize, DataTypes) => {
       references: { model: 'quizconfigs', key: 'id' }
     },
     team_id: {
-      type: DataTypes.INTEGER(11),
-      allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: true,
       references: { model: 'quizteams', key: 'id' }
+    },
+    connection_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     createdAt: {
       allowNull: false,
@@ -69,8 +75,27 @@ module.exports = (sequelize, DataTypes) => {
         {
           where: {
             player_id: player.id,
-            is_free: TRUE,
-            team_id: NULL
+            is_free: true,
+            team_id: null
+          }
+        }
+      ).then(player => {
+        resolve(player);
+      }).catch(err => {
+        reject(err);
+      });
+    });
+
+  };
+
+  PlayerAvailable.fetchFreePlayersQuizWise = (quizId) => {
+    return new Promise((resolve, reject) => {
+      PlayerAvailable.findAndCountAll(
+        {
+          where: {
+            quiz_id: quizId,
+            is_free: true,
+            team_id: null
           }
         }
       ).then(playerAvailable => {
@@ -79,9 +104,47 @@ module.exports = (sequelize, DataTypes) => {
         reject(err);
       });
     });
+  };
 
+  PlayerAvailable.updatePlayersWithTeam = (playerIds, quizId, status, teamId) => {
+    return new Promise((resolve, reject) => {
+      PlayerAvailable.update({
+        is_free: status,
+        team_id: teamId
+      }, {
+          where: {
+            player_id: { [Sequelize.Op.in]: playerIds },
+            quiz_id: quizId,
+            is_free: "TRUE"
+          }
+        }).then(updateCount => {
+          if (updateCount[0] != playerIds.length)
+            throw new CustomError("All players not updated to busy");
+          resolve(updateCount);
+        }).catch(err => {
+          console.log(err);
+          reject(err);
+        });
+    });
   }
 
+  PlayerAvailable.registerPlayerRequest = (playerId, quizId, connectionId) => {
+    return new Promise((resolve, reject) => {
+      PlayerAvailable.findOrCreate({
+        where: {
+          player_id: playerId,
+          is_free: true,
+          team_id: null,
+          quiz_id: quizId,
+          connection_id: connectionId
+        }
+      }).then(player => resolve(player))
+      .catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  };
 
   return PlayerAvailable;
 };

@@ -24,8 +24,12 @@ module.exports = {
         allowNull: false,
       },
       team_id: {
-        type: Sequelize.INTEGER(11),
-        allowNull: false,
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      connection_id: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,

@@ -62,7 +62,7 @@ const getDeviceToken = async (req, res, next) => {
                     return res.status(500).json({ error: true, status: 'FAILED', message: 'Incorrect ID or Password' });
                 }
             }).catch(error => {
-                return res.status(500).json({ error: true, status: 'FAILED', message: 'Some error occured while getting token. [001]' });
+                return res.status(500).json({ error: true, status: 'FAILED', message: 'Some error occured while getting token. [001] '+ error });
             })
 
     } catch (error) {

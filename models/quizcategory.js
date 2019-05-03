@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     updatedAt: {
       allowNull: true,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      allowNull:true
     }
   }, {});
   QuizCategory.associate = function (models) {

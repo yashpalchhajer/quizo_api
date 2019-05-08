@@ -7,8 +7,8 @@ module.exports = {
     return queryInterface.createTable(TABLE_QUIZ_TEAM, {
       id: {
         allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
+        // autoIncrement: true,
+        // primaryKey: true,
         type: Sequelize.INTEGER
       },
       team_id: {

@@ -39,6 +39,18 @@ module.exports = {
         type: Sequelize.DOUBLE,
         defaultValue: 0
       },
+      quiz_duration:{
+        type:Sequelize.INTEGER(3),
+        allowNull:false
+      },
+      no_of_questions:{
+        type:Sequelize.INTEGER(3),
+        allowNull:false
+      },
+      question_interval:{
+        type:Sequelize.INTEGER(3),
+        allowNull:false
+      },
       status: {
         type: Sequelize.ENUM('ACTIVE', 'INACTIVE', 'TERMINATE'),
         allowNull: false,

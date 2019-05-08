@@ -64,13 +64,15 @@ let GameController = require('./controllers/GameController');
 let io = require('socket.io')();
 app.io = io;
 global.io = io;
+let schedular = require('node-schedule');
 
 global.io.on('connection',function(socket){
     console.log('conn establish');
 
-    socket.on('joinRoom',function(data){
+    socket.on('joinRoom',function(roomId){
         console.log('event fired');
-        console.log(data);
+        socket.join(roomId);
+        scheduleQuestion(roomId);
     });
 
     socket.on('requestToPlay',function(request){
@@ -80,16 +82,24 @@ global.io.on('connection',function(socket){
         }
     });
 
-
 });
 
 
 global.io.on('disconnect',function(socket){
-    
-
+    console.log(socket);
 });
 
+let questions = require('./question');
 
-
+function scheduleQuestion(roomId){
+    let counter = 0;
+  
+    let startTime = new Date(Date.now());
+    let endTime = new Date(startTime.getTime() + 180000);
+    schedular.scheduleJob({ start: startTime, end: endTime,rule: '0-59/30 * * * * *' }, function(data){
+      counter++;
+      global.io.sockets.in(roomId).emit('fireQuest',questions[Math.floor(Math.random()*questions.length)]);
+    });
+  }
 
 module.exports = app;

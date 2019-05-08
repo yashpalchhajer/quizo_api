@@ -32,7 +32,6 @@ const TeamBuilder = async (req) => {
                     let playerData = {
                         playerId: player.player_id,
                         connectionId: player.connection_id,
-                        name: player.name
                     }
                     responsePlayerData.push(playerData);
                     updatePlayer.push(player.player_id);

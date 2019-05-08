@@ -30,6 +30,9 @@ const requestToPlay = async (req) => {
         return false;
     }
 
+    
+
+
     let playerAvailable = await PlayerAvailability.checkExistance(playerData);
 
     if (playerAvailable) {
@@ -48,16 +51,20 @@ const requestToPlay = async (req) => {
 
     let teamResp = await TeamBuilder(reqdata);
 
-    if(teamResp.hasOwnProperty('error') && teamResp.error == false && teamResp.hasOwnProperty('status') && teamResp.status == true){
-        if(teamResp.hasOwnProperty('data')){
+    if (teamResp.hasOwnProperty('error') && teamResp.error == false && teamResp.hasOwnProperty('status') && teamResp.status == true) {
+        if (teamResp.hasOwnProperty('data')) {
             teamResp.data.players.forEach((player) => {
-                global.io.sockets.connected[player.connectionId].emit('teamResp',player);
+                let resp = {
+                    teamId: teamResp.data.teamId,
+                    player: player
+                };
+                global.io.sockets.connected[player.connectionId].emit('teamResp', resp);
             });
         }
     }
 
 
-    console.log(teamResp);
+    // console.log(teamResp);
     // return res.status(200).json(teamResp);
     // console.log(global.io.sockets.connected);
 

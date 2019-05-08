@@ -10,7 +10,6 @@ const GamePlayer = require('../controllers/GameController');
 
 /* GET home page. */
 router.get('/', function (req, res) {
-  global.io.emit('assignRoom','dsd');
   res.render('index', { title: 'Express' });  
 });
 

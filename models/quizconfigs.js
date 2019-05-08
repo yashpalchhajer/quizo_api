@@ -38,6 +38,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DOUBLE,
       defaultValue: 0
     },
+    quiz_duration:{
+      type:DataTypes.INTEGER(3),
+      allowNull:false
+    },
+    no_of_questions:{
+      type:DataTypes.INTEGER(3),
+      allowNull:false
+    },
+    question_interval:{
+      type:DataTypes.INTEGER(3),
+      allowNull:false
+    },
     status: {
       type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'TERMINATE'),
       allowNull: false,

@@ -9,6 +9,8 @@ const TABLE_QUIZ_CATEGORY = PREFIX+'quiz_categories';
 const TABLE_QUIZ_CONFIG = PREFIX+'quiz_configs';
 const TABLE_PLAYER_AVAILABLE = PREFIX+'players_availables';
 const TABLE_QUIZ_TEAM = PREFIX+'quiz_teams';
+const TABLE_QUESTION_MASTER = PREFIX+'question_master';
+const TABLE_PLAYER_QUESTIOS = PREFIX+'player_questions';
 
 module.exports = {
     TABLE_MERCHANT_MASTER,
@@ -17,5 +19,7 @@ module.exports = {
     TABLE_QUIZ_CATEGORY,
     TABLE_QUIZ_CONFIG,
     TABLE_PLAYER_AVAILABLE,
-    TABLE_QUIZ_TEAM
+    TABLE_QUIZ_TEAM,
+    TABLE_QUESTION_MASTER,
+    TABLE_PLAYER_QUESTIOS
 }

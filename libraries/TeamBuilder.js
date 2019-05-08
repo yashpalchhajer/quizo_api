@@ -41,7 +41,8 @@ const TeamBuilder = async (req) => {
                 await quizTeam.registerNewTeam(teamData);
                 let responseData = {
                     teamId: teamId,
-                    players: responsePlayerData
+                    players: responsePlayerData,
+                    playerIds: updatePlayer
                 }
                 return { error: false, status: true, message: "Team successfully generated", data: responseData};
             }

@@ -1,5 +1,6 @@
 'use strict';
 const { TABLE_PLAYERS } = require('../config/dbConstant');
+const Sequelize = require('sequelize');
 
 
 module.exports = (sequelize, DataTypes) => {
@@ -55,11 +56,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'merchant_id'
     });
 
-  /*   Players.belongToMany(models.qa_players_availables,{
-      through: 'playeravailbles',
-      as: 'availability',
-      foreignKey: 'id'
-    }); */
+    /*   Players.belongToMany(models.qa_players_availables,{
+        through: 'playeravailbles',
+        as: 'availability',
+        foreignKey: 'id'
+      }); */
 
     // associations can be defined here
   };
@@ -74,10 +75,10 @@ module.exports = (sequelize, DataTypes) => {
         console.log('Found');
         resolve(player)
       })
-      .catch(err => {
-        console.log(err);
-        rejector(err)
-      });
+        .catch(err => {
+          console.log(err);
+          rejector(err)
+        });
     });
   };
 
@@ -99,6 +100,22 @@ module.exports = (sequelize, DataTypes) => {
         .then((player) => {
           resolve(player.get({ plain: true }));
         }).catch(err => reject(err));
+    });
+  }
+
+  Players.getDetails = (ids) => {
+    return new Promise((resolve, reject) => {
+      Players.findAll({
+        raw: true,
+        where: {
+          id: { [Sequelize.Op.in]: ids }
+        },
+        attributes: ['name']
+      }).then((data) => {
+        resolve(data);
+      }).catch(err => {
+        reject(err);
+      })
     });
   }
 

@@ -62,5 +62,18 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
+  QuizTeams.getTeamPlayers = (teamId) => {
+    return new Promise((resolve,reject) => {
+      QuizTeams.findAll({
+        raw:true,
+        where: {
+          team_id: teamId
+        }
+      })
+      .then((playersList) => resolve(playersList))
+      .catch(err => reject(err));
+    });
+  }
+
   return QuizTeams;
 };

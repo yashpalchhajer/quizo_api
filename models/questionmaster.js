@@ -1,5 +1,6 @@
 'use strict';
 const {TABLE_QUESTION_MASTER} = require('../config/dbConstant');
+const {TABLE_QUIZ_CONFIG} = require('../config/dbConstant');
 
 module.exports = (sequelize, DataTypes) => {
   const QuestionMaster = sequelize.define(TABLE_QUESTION_MASTER, {
@@ -9,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    quiz_category_id:{
+    quiz_id:{
       type: DataTypes.INTEGER,
       allowNull: false
     },
@@ -38,11 +39,26 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   QuestionMaster.associate = function(models) {
     // associations can be defined here
-    QuestionMaster.belongsTo(models.qa_question_master,{
-      through: 'category_id',
-      as: 'quiz_category',
-      foreignKey: 'quiz_category_id'
+    QuestionMaster.belongsTo(models.qa_question_masters,{
+      through: 'quiz_number',
+      as: TABLE_QUIZ_CONFIG,
+      foreignKey: 'quiz_id'
     });
   };
+
+  QuestionMaster.fetchQuizWiseQuestions = (quizId) => {
+    return new Promise((resolve,reject) => {
+      QuestionMaster.findAll({
+        raw : true,
+        where : {
+          quiz_id: quizId
+        },
+        attributes : { exclude : ['answer','createdAt','updatedAt','quiz_id'] }
+      }).then((questionsList) => resolve(questionsList))
+      .catch((err) => {
+        console.log(err);
+        reject(err)});
+    });
+  }
   return QuestionMaster;
 };

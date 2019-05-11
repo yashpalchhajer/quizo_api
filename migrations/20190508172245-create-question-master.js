@@ -1,6 +1,6 @@
 'use strict';
 const { TABLE_QUESTION_MASTER } = require('../config/dbConstant');
-const { TABLE_QUIZ_CATEGORY } = require('../config/dbConstant');
+const { TABLE_QUIZ_CONFIG } = require('../config/dbConstant');
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable(TABLE_QUESTION_MASTER, {
@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      quiz_category_id: {
+      quiz_id: {
         type: Sequelize.INTEGER,
         allowNull: false
       },
@@ -37,11 +37,11 @@ module.exports = {
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       }
     })
-      .then(() => queryInterface.addConstraint(TABLE_QUESTION_MASTER, ['quiz_category_id'], {
+      .then(() => queryInterface.addConstraint(TABLE_QUESTION_MASTER, ['quiz_id'], {
         type: 'FOREIGN KEY',
-        name: 'quiz-category',
+        name: 'quiz-id',
         references: {
-          table: TABLE_QUIZ_CATEGORY,
+          table: TABLE_QUIZ_CONFIG,
           field: 'id'
         },
         onDelete: 'restrict',

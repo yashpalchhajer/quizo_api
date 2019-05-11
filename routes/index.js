@@ -24,7 +24,7 @@ router.post('/register-otp', verifyDeviceToken,PlayerController.verifyAuthOtp);
 router.post('/login', verifyDeviceToken, PlayerController.login);
 router.post('/resend-otp', PlayerController.resendOTP, verifyDeviceToken);
 
-// router.post('/requstToPlay',GamePlayer.requstToPlay);
+router.post('/requestToPlay',GamePlayer.requestToPlay);
 
 
 module.exports = router;

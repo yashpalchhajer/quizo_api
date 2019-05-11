@@ -38,17 +38,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DOUBLE,
       defaultValue: 0
     },
-    quiz_duration:{
-      type:DataTypes.INTEGER(3),
-      allowNull:false
+    quiz_duration: {
+      type: DataTypes.INTEGER(3),
+      allowNull: false
     },
-    no_of_questions:{
-      type:DataTypes.INTEGER(3),
-      allowNull:false
+    no_of_questions: {
+      type: DataTypes.INTEGER(3),
+      allowNull: false
     },
-    question_interval:{
-      type:DataTypes.INTEGER(3),
-      allowNull:false
+    question_interval: {
+      type: DataTypes.INTEGER(3),
+      allowNull: false
     },
     status: {
       type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'TERMINATE'),
@@ -70,12 +70,13 @@ module.exports = (sequelize, DataTypes) => {
     return new Promise((resolve, reject) => {
       QuizConfigs.findOne(
         {
+          raw: true,
           where: {
             id: quizId,
           }
         }
-      ).then(quizConfigs => {
-        resolve(quizConfigs);
+      ).then(quizData => {
+        resolve(quizData);
       }).catch(err => {
         reject(err);
       });

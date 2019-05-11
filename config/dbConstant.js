@@ -9,7 +9,7 @@ const TABLE_QUIZ_CATEGORY = PREFIX+'quiz_categories';
 const TABLE_QUIZ_CONFIG = PREFIX+'quiz_configs';
 const TABLE_PLAYER_AVAILABLE = PREFIX+'players_availables';
 const TABLE_QUIZ_TEAM = PREFIX+'quiz_teams';
-const TABLE_QUESTION_MASTER = PREFIX+'question_master';
+const TABLE_QUESTION_MASTER = PREFIX+'question_masters';
 const TABLE_PLAYER_QUESTIOS = PREFIX+'player_questions';
 
 module.exports = {

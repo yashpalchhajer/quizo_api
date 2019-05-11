@@ -3,6 +3,7 @@ const Player = require('../models').qa_players;
 const Validator = require('validatorjs');
 const PlayerAvailability = require('../models').qa_players_availables;
 const TeamBuilder = require('../libraries/TeamBuilder');
+const findQuestion = require('../libraries/QuestionFinder');
 const QuizTeam = require('../models').qa_quiz_teams;
 const QuizConfigs = require('../models').qa_quiz_configs;
 const DateHelpers = require('../libraries/DateHandlers');
@@ -87,7 +88,10 @@ const requestToPlay = async (req) => {
     };
 
     let teamResp = await TeamBuilder(reqdata);
-
+    // console.log("teamBuilder response-: ");
+    // console.log(+teamResp);
+    // let questionResponse = await findQuestion(teamResp.data);
+    // console.log(questionResponse);
     if (teamResp.hasOwnProperty('error') && teamResp.error == false && teamResp.hasOwnProperty('status') && teamResp.status == true) {
         if (teamResp.hasOwnProperty('data')) {
 
@@ -106,7 +110,7 @@ const requestToPlay = async (req) => {
             });
         }
     }
-
+    
 
     // console.log(teamResp);
     // return res.status(200).json(teamResp);

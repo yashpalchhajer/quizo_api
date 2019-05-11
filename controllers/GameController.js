@@ -7,6 +7,7 @@ const findQuestion = require('../libraries/QuestionFinder');
 const QuizTeam = require('../models').qa_quiz_teams;
 const QuizConfigs = require('../models').qa_quiz_configs;
 const DateHelpers = require('../libraries/DateHandlers');
+let schedular = require('node-schedule');
 
 const requestToPlay = async (req) => {
     let reqBody = req;
@@ -122,7 +123,25 @@ const requestToPlay = async (req) => {
 
 }
 
+const scheduleQuestion = async (roomId) => {
+    let counter = 0;
+    if(global.io.sockets.adapter.rooms[roomId].length != 2){
+        return true
+    }
+    let startTime = new Date(Date.now());
+    let endTime = new Date(startTime.getTime() + 180000);
+    schedular.scheduleJob({ start: startTime, end: endTime,rule: '0-59/30 * * * * *' }, async (data) => {
+      counter++;
+        let questReq = {
+            'teamId' : roomId
+        };
+        const question = await findQuestion(questReq);
+
+        global.io.sockets.in(roomId).emit('fireQuest',question);
+    });
+}
 
 module.exports = {
-    requestToPlay
+    requestToPlay,
+    scheduleQuestion
 }

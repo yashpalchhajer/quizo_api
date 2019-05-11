@@ -6,7 +6,7 @@ var router = express.Router();
 
 const MerchanController = require('../controllers').MerchantController;
 const PlayerController = require('../controllers').PlayerController;
-const GamePlayer = require('../controllers/GameController');
+// const GamePlayer = require('../controllers/GameController');
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -24,7 +24,7 @@ router.post('/register-otp', verifyDeviceToken,PlayerController.verifyAuthOtp);
 router.post('/login', verifyDeviceToken, PlayerController.login);
 router.post('/resend-otp', PlayerController.resendOTP, verifyDeviceToken);
 
-router.post('/requestToPlay',GamePlayer.requestToPlay);
+// router.post('/requestToPlay',GamePlayer.requestToPlay);
 
 
 module.exports = router;

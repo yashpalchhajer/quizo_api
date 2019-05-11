@@ -69,10 +69,14 @@ const findQuestion = async (req) => {
             }
         }
         await playerQuestions.insertPlayersQuestion(playerOldQuestions);
+
         console.log("time after selecting unique question -: "+Date());
+
+        return { error: false, status: true, message: '',data: finalQuestion };
+
     }catch(error){
         if (error instanceof CustomError) {
-            return { error: false, status: false, message: error.message };
+            return { error: true, status: false, message: error.message };
         } else {
             console.log(error);
             return { error: true, status: false, message: "Fail to find question " + error.message };

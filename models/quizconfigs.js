@@ -83,5 +83,30 @@ module.exports = (sequelize, DataTypes) => {
     });
 
   }
+
+  QuizConfigs.getQuiz = () => {
+    return new Promise((resolve, reject) => {
+      QuizConfigs.findAll(
+        {
+          raw: true,
+          where: {
+            status: 'ACTIVE'
+          },
+          attributes: ['id','name','icon','quiz_cost','team_size','min_members','winner_prize','quiz_duration','no_of_questions','question_interval']
+        }
+      ).then( (data) => {
+        if(!data){
+          reject('Error in getting Quiz list!');
+        }
+
+        resolve(data);
+      }).catch( err => {
+        reject(err);
+      });
+    });
+  }
+
+
+
   return QuizConfigs;
 };

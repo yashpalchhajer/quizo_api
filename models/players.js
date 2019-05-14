@@ -40,6 +40,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'ACTIVE'
     },
+    is_otp_verified:{
+      type: DataTypes.ENUM('YES','NO'),
+      defaultValue: 'NO'
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
@@ -72,7 +76,6 @@ module.exports = (sequelize, DataTypes) => {
           where: { contact_number: mobile }
         }
       ).then(player => {
-        console.log('Found');
         resolve(player)
       })
         .catch(err => {
@@ -84,7 +87,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Players.register = (reqData) => {
     return new Promise((resolve, reject) => {
-      let name = reqData.name;
+      let name = reqData.name  || null;
       let merchant_id = reqData.merchant_id;
       let contact_number = reqData.contact_number;
       let email = reqData.email || null;

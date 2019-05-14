@@ -39,6 +39,10 @@ module.exports = {
         allowNull:false,
         defaultValue:'ACTIVE'
       },
+      is_otp_verified:{
+        type: Sequelize.ENUM('YES','NO'),
+        defaultValue: 'NO'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -136,7 +136,8 @@ const scheduleQuestion = async (roomId) => {
             'teamId' : roomId
         };
         const question = await findQuestion(questReq);
-
+        
+        /** #TODO check response if required */
         global.io.sockets.in(roomId).emit('fireQuest',question);
     });
 }

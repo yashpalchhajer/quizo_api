@@ -41,11 +41,15 @@ const VerifyDeviceToken = (token,merchantId) => {
 const VerifyAccessToken = (token,contact_number) => {
     return new Promise((resolve,reject) => {
         Player.findOne({
-            where:{contact_number:contact_number,status:'ACTIVE'}
+            where:{
+                contact_number:contact_number,
+                status:'ACTIVE',
+                is_otp_verified:'YES'
+            }
         }).then(player => {
 
             if(!player){
-                reject(false);
+                reject('Player is not registered or OTP is not verified!');
             }
 
             jwt.verify(token,player.contact_number,(err,decoded) => {

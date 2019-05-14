@@ -54,9 +54,21 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   OTPTokens.generateOTP = (player, action) => {
-    return new Promise((resolve, reject) => {
-      let otp = Math.floor(Math.random() * Math.floor(process.env.OTP_LENTGH));
+    return new Promise( async (resolve, reject) => {
+      let otp = Math.floor(Math.random() * (+Number(process.env.OTP_LENTGH) - +1)) + +1 + +Number(process.env.OTP_LENTGH);
+      
       const validUpto = dateFormat('yyyy-mm-dd HH:MM:ss');
+
+      await OTPTokens.update(
+        {is_valid: false},
+        {
+          where:
+            {
+              player_id: player.id,
+              action: action
+            }
+          }
+      );
 
       OTPTokens.create({
         player_id: player.id,
@@ -65,7 +77,6 @@ module.exports = (sequelize, DataTypes) => {
         retry_available: process.env.RETRY_AVAILABLE,
         valid_upto: validUpto
       }).then(otpToken => {
-        // console.log(otpToken);
         resolve(otpToken.otp);
       })
         .catch(err => { console.log(err); reject(err) });

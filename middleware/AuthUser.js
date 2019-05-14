@@ -39,12 +39,11 @@ const AuthUser = async (req,res,next) => {
         }
 
         req.body['player_id'] = verifyAcess;
-        console.log(req.body);
         next();
 
     }catch(err){
         console.log('Error in Auth middleware ' + err);
-        return res.status(400).json({error:true,status:"FAILED",message: "Exception in access toke verification " + err});
+        return res.status(400).json({error:true,status:"FAILED",message: "Exception in access token verification " + err});
     }
 }
 

@@ -71,7 +71,6 @@ global.io.on('connection',function(socket){
     socket.on('joinRoom',function(roomId){
         console.log('room joined');
         socket.join(roomId);
-        console.log(GameController);
         GameController.scheduleQuestion(roomId);
     });
 

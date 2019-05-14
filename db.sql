@@ -24,7 +24,11 @@ ALTER TABLE `qa_quiz_categories` CHANGE `updatedAt` `updatedAt` DATETIME on upda
 
 ALTER TABLE `qa_quiz_configs` CHANGE `updatedAt` `updatedAt` DATETIME on update CURRENT_TIMESTAMP NULL;
 
-ALTER TABLE `qa_question_master` DROP FOREIGN KEY `quiz-category`; ALTER TABLE `qa_question_master` ADD CONSTRAINT `quiz-id` FOREIGN KEY (`quiz_id`) REFERENCES `qa_quiz_configs`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+
+ALTER TABLE `qa_player_questions` CHANGE `updatedAt` `updatedAt` DATETIME on update CURRENT_TIMESTAMP NULL;
+
+ALTER TABLE `qa_question_masters` DROP FOREIGN KEY `quiz-category`; 
+ALTER TABLE `qa_question_masters` ADD CONSTRAINT `quiz-id` FOREIGN KEY (`quiz_id`) REFERENCES `qa_quiz_configs`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- to change Quiz Config table add new coloms
 
@@ -36,4 +40,13 @@ ALTER TABLE `qa_quiz_configs` ADD `quiz_duration` INT(3) NOT NULL AFTER `winner_
 UPDATE `qa_quiz_configs` SET `quiz_duration` = '300' WHERE `qa_quiz_configs`.`id` = 1;
 UPDATE `qa_quiz_configs` SET `no_of_questions` = '10' WHERE `qa_quiz_configs`.`id` = 1;
 UPDATE `qa_quiz_configs` SET `question_interval` = '30' WHERE `qa_quiz_configs`.`id` = 1;
+
+ALTER TABLE `qa_players` ADD `is_otp_verified` ENUM('YES','NO') NOT NULL DEFAULT 'NO' AFTER `status`;
+
+
+/** 14 May 19 **/
+
+ALTER TABLE `qa_players` ADD UNIQUE(`contact_number`);
+ALTER TABLE `qa_players` ADD INDEX(`contact_number`);
+
 

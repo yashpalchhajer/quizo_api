@@ -29,7 +29,7 @@ const AuthUser = async (req,res,next) => {
         }
 
         if(!req.body['contact_number']){
-            return res.status(400).json({error:true,status:"FAILED",message: "Player id missing!"});
+            return res.status(400).json({error:true,status:"FAILED",message: "Contact Number Missing!"});
         }
 
         const verifyAcess = await EncryptLib.VerifyAccessToken(accessToken,req.body['contact_number']);

@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
     final_score: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     createdAt: {
@@ -64,7 +64,7 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
-  QuizTeams.getTeamPlayers = (teamId) => {
+  QuizTeams.getTeamPlayersList = (teamId) => {
     return new Promise((resolve,reject) => {
       QuizTeams.findAll({
         raw:true,
@@ -101,6 +101,20 @@ module.exports = (sequelize, DataTypes) => {
           team_id: teamId
         },
         attributes: ['player_id']
+      }).then((data) => {
+        resolve(data);
+      }).catch(err => reject(err));
+    });
+  }
+
+  QuizTeams.getTeamPlayer = (playerId, teamId) => {
+    new Promise((resolve, reject) => {
+      QuizTeams.find({
+        raw: true,
+        where : {
+          team_id: teamId,
+          player_id: playerId
+        }
       }).then((data) => {
         resolve(data);
       }).catch(err => reject(err));

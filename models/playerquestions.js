@@ -7,6 +7,12 @@ module.exports = (sequelize, DataTypes) => {
     player_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      allowNull: false
+    },
+    quiz_id: {
+      type: DataTypes.INTEGER,
+      rimaryKey: true,
+      allowNull: false
     },
     questions_id: {
       type: DataTypes.JSON,
@@ -28,11 +34,12 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
   };
 
-  PlayerQuestions.fetchPlayersQuestions = (playerIds) => {
+  PlayerQuestions.fetchPlayersQuestions = (playerIds, quizId) => {
     return new Promise((resolve, reject) => {
       PlayerQuestions.findAll({
         raw : true,
         where: {
+          quiz_id: quizId,
           player_id: { [Sequelize.Op.in]: playerIds }
         },
         attributes : { exclude: ['createdAt','updatedAt'] }

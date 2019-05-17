@@ -28,7 +28,7 @@ module.exports = {
         allowNull: true,
       },
       final_score: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER(11),
         allowNull: true
       },
       createdAt: {

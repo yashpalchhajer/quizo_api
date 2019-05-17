@@ -49,4 +49,14 @@ ALTER TABLE `qa_players` ADD `is_otp_verified` ENUM('YES','NO') NOT NULL DEFAULT
 ALTER TABLE `qa_players` ADD UNIQUE(`contact_number`);
 ALTER TABLE `qa_players` ADD INDEX(`contact_number`);
 
+/** 15 May 19 **/
 
+ALTER TABLE `qa_player_questions`   
+  ADD COLUMN `quiz_id` INT(11) DEFAULT 1 NOT NULL AFTER `player_id`, 
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`player_id`, `quiz_id`),
+  ADD CONSTRAINT `playerId` FOREIGN KEY (`player_id`) REFERENCES `qa_players`(`id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  ADD CONSTRAINT `quizId` FOREIGN KEY (`quiz_id`) REFERENCES `qa_quiz_configs`(`id`) ON UPDATE RESTRICT ON DELETE RESTRICT;
+
+ALTER TABLE `qa_player_questions` CHANGE `quiz_id` `quiz_id` INT(11) NOT NULL;
+ALTER TABLE `qa_quiz_teams` CHANGE `final_score` `final_score` INT(11) DEFAULT 0 NULL;

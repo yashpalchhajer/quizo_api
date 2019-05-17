@@ -4,13 +4,14 @@ const CustomError = require('./customError');
 const quizTeam = require('../models').qa_quiz_teams;
 const questionMaster = require('../models').qa_question_masters;
 const playerQuestions = require("../models").qa_player_questions;
-
+const date = require('date-and-time');
 
 const findQuestion = async (req) => {
     try{
         const teamId = req.teamId;
         console.log("time before selecting unique question -: "+Date());
-        let quizPlayerIds = await quizTeam.getTeamPlayers(teamId);
+        // have to check only active team players and get only active players
+        let quizPlayerIds = await quizTeam.getTeamPlayersList(teamId);
         if(!quizPlayerIds)
             throw new CustomError("No player found as per quiz");
         const playerIds = [];
@@ -19,12 +20,11 @@ const findQuestion = async (req) => {
             playerIds.push(player.player_id);
             quizId = player.quiz_id;
         });
-        let playerOldQuestions = await playerQuestions.fetchPlayersQuestions(playerIds);
+        let playerOldQuestions = await playerQuestions.fetchPlayersQuestions(playerIds, quizId);
         const questions = await questionMaster.fetchQuizWiseQuestions(quizId);
         if(questions.length <= 0)
             throw new CustomError("No questions available for quiz");
         let finalQuestion;
-        // check player active in quiz
         if(playerOldQuestions.length == 0) {
             finalQuestion = questions[0];
             playerIds.forEach(playerId => {
@@ -43,7 +43,8 @@ const findQuestion = async (req) => {
             let filteredQuestions = questions.filter(question => !oldQuestions.includes(question.id));
             if(filteredQuestions.length == 0)
                 throw new CustomError("No more unique question");
-            finalQuestion = filteredQuestions[0];    
+            finalQuestion = filteredQuestions[0];
+            finalQuestion.questionPushTime = new Date().getTime();
             if(playerOldQuestions.length != quizPlayerIds.length) {
                 let playerMap = new Map();
                 playerOldQuestions.forEach(playerQuestion => {
@@ -69,11 +70,8 @@ const findQuestion = async (req) => {
             }
         }
         await playerQuestions.insertPlayersQuestion(playerOldQuestions);
-
         console.log("time after selecting unique question -: "+Date());
-
-        return { error: false, status: true, message: '',data: finalQuestion };
-
+        return { error: false, status: true, message: 'Success',data: finalQuestion };
     }catch(error){
         if (error instanceof CustomError) {
             return { error: true, status: false, message: error.message };

@@ -6,6 +6,12 @@ module.exports = {
     return queryInterface.createTable(TABLE_PLAYER_QUESTIOS, {
       player_id: {
         type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+      },
+      quiz_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
         primaryKey: true,
       },
       questions_id:{

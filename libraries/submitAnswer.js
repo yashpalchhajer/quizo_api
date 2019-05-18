@@ -3,7 +3,6 @@
 const CustomError = require('./customError');
 const quizTeam = require('../models').qa_quiz_teams;
 const questionMaster = require('../models').qa_question_masters;
-const playerQuestions = require("../models").qa_player_questions;
 const quizConfigs = require('../models').qa_quiz_configs;
 const date = require('date-and-time');
 
@@ -30,12 +29,18 @@ const submitAnswer = async (req) => {
         const quizDetails = await quizConfigs.checkExistance(quizPlayers[0].quiz_id);
         let totalQuestionsPushedToTeam = 0;
         // start loop
+        let nextQuestion = true;
         quizPlayers.forEach(player => {
+            // check is player submitted this question's answer
+            let oldQuestion = player.questions.some(answer => answer['questionId'] == req.questionId);
             // check player id and update on match
-            if(player.player_id == req.playerId){
+            if(player.player_id == req.playerId) {
                 // check is player active
                 if(!player.questions)
-                    player.questions = [];
+                player.questions = [];
+                if(oldQuestion)
+                    throw new CustomError("Player already submitted this question's answer");
+                oldQuestion = true;
                 let questionObj = {
                     questionId: req.questionId,
                     answer: req.answer,
@@ -53,11 +58,13 @@ const submitAnswer = async (req) => {
             }
             if(totalQuestionsPushedToTeam < player.pushed_questions)
                 totalQuestionsPushedToTeam = player.pushed_questions;
+            if(nextQuestion)
+                nextQuestion = oldQuestion;
         });
         // end loop
         let responseData = {
             isCorrect: isAnswerValid,
-            nextQuestion: true
+            nextQuestion: nextQuestion
         }
         if((quizDetails.no_of_questions - totalQuestionsPushedToTeam) == 0)
             responseData.nextQuestion = false;

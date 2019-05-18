@@ -2,6 +2,8 @@
 const { TABLE_QUIZ_TEAM } = require('../config/dbConstant');
 const QuizConfigs = require('../models').qa_quiz_configs;
 const Players = require('../models').qa_players;
+const Sequelize = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   const QuizTeams = sequelize.define(TABLE_QUIZ_TEAM, {
     id: {
@@ -41,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    pushed_questions: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
@@ -65,15 +71,15 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   QuizTeams.getTeamPlayersList = (teamId) => {
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
       QuizTeams.findAll({
-        raw:true,
+        raw: true,
         where: {
           team_id: teamId
         }
       })
-      .then((playersList) => resolve(playersList))
-      .catch(err => reject(err));
+        .then((playersList) => resolve(playersList))
+        .catch(err => reject(err));
     });
   }
 
@@ -111,7 +117,7 @@ module.exports = (sequelize, DataTypes) => {
     new Promise((resolve, reject) => {
       QuizTeams.find({
         raw: true,
-        where : {
+        where: {
           team_id: teamId,
           player_id: playerId
         }
@@ -121,5 +127,19 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
+  QuizTeams.updatePushedQuestionsCount = (playerIds, count, teamId) => {
+    new Promise((resolve, reject) => {
+      QuizTeams.update({
+        pushed_questions: Sequelize.literal(' pushed_questions + ' + count)
+      }, {
+          where: {
+            team_id: teamId,
+            player_id: { [Sequelize.Op.in]: playerIds }
+          }
+        }).then((data) => {
+          resolve(data);
+        }).catch(err => reject(err));
+    });
+  }
   return QuizTeams;
 };

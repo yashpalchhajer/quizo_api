@@ -28,10 +28,12 @@ const submitAnswer = async (req) => {
             throw new CustomError("Invalid team");
         // fetch quiz config
         const quizDetails = await quizConfigs.checkExistance(quizPlayers[0].quiz_id);
+        let totalQuestionsPushedToTeam = 0;
         // start loop
         quizPlayers.forEach(player => {
             // check player id and update on match
             if(player.player_id == req.playerId){
+                // check is player active
                 if(!player.questions)
                     player.questions = [];
                 let questionObj = {
@@ -44,13 +46,21 @@ const submitAnswer = async (req) => {
                 // update final_score
                 if(isAnswerValid)
                     player.final_score = player.final_score + 1;
+                player.update({
+                    final_score: player.final_score + 1,
+                    questions: player.questions
+                });
             }
-            // logic to check isPlayerQuizWinner
+            if(totalQuestionsPushedToTeam < player.pushed_questions)
+                totalQuestionsPushedToTeam = player.pushed_questions;
         });
         // end loop
         let responseData = {
-            isAnswerValid: isAnswerValid
+            isCorrect: isAnswerValid,
+            nextQuestion: true
         }
+        if((quizDetails.no_of_questions - totalQuestionsPushedToTeam) == 0)
+            responseData.nextQuestion = false;
         console.log("time after submitting answer -: " + Date());
         return { error: false, status: true, message: 'Success', data: responseData };
     } catch (error) {
@@ -58,7 +68,7 @@ const submitAnswer = async (req) => {
             return { error: true, status: false, message: error.message };
         } else {
             console.log(error);
-            return { error: true, status: false, message: "Fail to find question " + error.message };
+            return { error: true, status: false, message: "Error to submit answer " + error.message };
         }
     }
 

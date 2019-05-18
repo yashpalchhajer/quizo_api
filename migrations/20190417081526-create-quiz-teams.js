@@ -31,6 +31,10 @@ module.exports = {
         type: Sequelize.INTEGER(11),
         allowNull: true
       },
+      pushed_questions: {
+        type: Sequelize.INTEGER(11),
+        allowNull: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

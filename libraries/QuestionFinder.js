@@ -9,11 +9,11 @@ const date = require('date-and-time');
 const findQuestion = async (req) => {
     try{
         const teamId = req.teamId;
-        console.log("time before selecting unique question -: "+Date());
+        console.log("time before selecting unique question -: " + Date());
         // have to check only active team players and get only active players
         let quizPlayerIds = await quizTeam.getTeamPlayersList(teamId);
         if(!quizPlayerIds)
-            throw new CustomError("No player found as per quiz");
+            throw new CustomError("No player found as per team");
         const playerIds = [];
         let quizId;
         quizPlayerIds.forEach(player => {
@@ -22,7 +22,7 @@ const findQuestion = async (req) => {
         });
         let playerOldQuestions = await playerQuestions.fetchPlayersQuestions(playerIds, quizId);
         const questions = await questionMaster.fetchQuizWiseQuestions(quizId);
-        if(questions.length <= 0)
+        if(questions.length == 0)
             throw new CustomError("No questions available for quiz");
         let finalQuestion;
         if(playerOldQuestions.length == 0) {
@@ -30,7 +30,8 @@ const findQuestion = async (req) => {
             playerIds.forEach(playerId => {
                 let player = {
                     player_id : playerId,
-                    questions_id : [finalQuestion.id]
+                    questions_id : [finalQuestion.id],
+                    quiz_id: quizId
                 }
                 playerOldQuestions.push(player);
             })
@@ -52,10 +53,12 @@ const findQuestion = async (req) => {
                 });
                 quizPlayerIds.forEach(playerId => {
                     let player = playerMap.get(playerId.player_id);
-                    if(player == null){
+                    console.log(player);
+                    if(player == null) {
                         player = {
                             player_id : playerId.player_id,
-                            questions_id : [finalQuestion.id]
+                            questions_id : [finalQuestion.id],
+                            quiz_id: quizId
                         }
                         playerMap.set(playerId.player_id, player);
                     } else {
@@ -70,6 +73,7 @@ const findQuestion = async (req) => {
             }
         }
         await playerQuestions.insertPlayersQuestion(playerOldQuestions);
+        await quizTeam.updatePushedQuestionsCount(playerIds, 1, teamId);
         console.log("time after selecting unique question -: "+Date());
         return { error: false, status: true, message: 'Success',data: finalQuestion };
     }catch(error){

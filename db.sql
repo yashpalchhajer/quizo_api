@@ -59,4 +59,10 @@ ALTER TABLE `qa_player_questions`
   ADD CONSTRAINT `quizId` FOREIGN KEY (`quiz_id`) REFERENCES `qa_quiz_configs`(`id`) ON UPDATE RESTRICT ON DELETE RESTRICT;
 
 ALTER TABLE `qa_player_questions` CHANGE `quiz_id` `quiz_id` INT(11) NOT NULL;
-ALTER TABLE `qa_quiz_teams` CHANGE `final_score` `final_score` INT(11) DEFAULT 0 NULL;
+ALTER TABLE `qa_quiz_teams` CHANGE `final_score` `final_score` INT(11) DEFAULT 0 NOT NULL;
+
+
+/** 17 May 19 **/
+ALTER TABLE `qa_quiz_teams` ADD COLUMN `pushed_questions` INT(11) DEFAULT 0 NOT NULL AFTER `final_score`;
+
+

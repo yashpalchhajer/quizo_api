@@ -178,11 +178,16 @@ const setQueInterval = (queReq, interval) => {
 
 const sendQuestion = async (quesReq) => {
     const question = await findQuestion(quesReq);
+    /** Check question response and do acco
+     *  if no question available then clearInterval
+     *  if Winnner is then notify for Winner
+     */
+
     global.io.sockets.in(quesReq.teamId).emit('fireQuest', question);
 }
 
 const submitUserAnswer = async (req, res) => {
-console.log('submit ans req-------------------------');
+
     try {
         let reqBody = req.body;
         const rules = {
@@ -200,13 +205,43 @@ console.log('submit ans req-------------------------');
         }
 
         let playerData = await Player.getDetailsById(reqBody.playerId);
-        console.log('--------------------- player data --------------------');
-        // console.log(playerData);
+
         if (!playerData) {
             return res.status(200).json({ error: true, status: 'FAILED', message: 'No Player Found With ID' });
         }
 
         const submitResp = await SubmitAnswer(reqBody);
+        let responseData = {
+            error: false,
+            status: 'SUCCESS'
+        };
+
+        if(submitResp.hasOwnProperty('error') && submitResp.error == false){
+            if(submitResp.status == true){
+                /** Fire Event for Answer submit */
+                responseData.data = {
+                    playerId: playerData.id,
+                    isCorrect: submitResp.data.isCorrect
+                };
+                global.io.sockets.in(reqBody.teamId).emit('notifyTeam', responseData);
+                console.log(submitResp);
+                if(submitResp.data.nextQuestion == true){
+                    clearInterval(global.schedulledJobs[reqBody.teamId]);
+                    let questReq = {
+                        'teamId': reqBody.teamId
+                    };
+                    console.log('New Question Fired');
+                    sendQuestion(questReq);
+                    global.schedulledJobs[reqBody.teamId] = setQueInterval(questReq, submitResp.data.questionInterval);
+                    console.log(global.schedulledJobs);
+                }
+                
+            }else if(submitResp.status == false){
+                // not submitted
+            }
+        }else{
+            // invalid resp
+        }
 
         console.log(submitResp);
 

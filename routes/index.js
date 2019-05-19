@@ -26,7 +26,7 @@ router.post('/resend-otp', verifyDeviceToken, PlayerController.resendOTP);
 router.post('/updatePlayer', AuthUser, PlayerController.updatePlayer);
 router.get('/quizList', verifyDeviceToken, DashBoard.quizList);
 
-router.post('/submitAnswer',GameController.submitUserAnswer);
+router.post('/submitAnswer', AuthUser, GameController.submitUserAnswer);
 // router.post('/requestToPlay',GamePlayer.requestToPlay);
 
 

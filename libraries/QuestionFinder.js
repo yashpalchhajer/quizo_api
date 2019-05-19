@@ -64,7 +64,10 @@ const findQuestion = async (req) => {
             response.data.winnerId = winnerPlayerId;
             return response;
         }
-        console.log("time after selecting winner -: " + Date());
+
+        if(restQuestionsToPush == 0){
+            throw new CustomError('All Questions Done!');
+        }
 
         let playerOldQuestions = await playerQuestions.fetchPlayersQuestions(playerIds, quizId);
         const questions = await questionMaster.fetchQuizWiseQuestions(quizId);

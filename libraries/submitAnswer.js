@@ -13,7 +13,6 @@ const submitAnswer = async (req) => {
         // }
         console.log("time before submitting answer -: " + Date());
         // fetch question
-        console.log(req.questionId);
         let question = await questionMaster.getQuestion(req.questionId);
         // if not exist  error
         if (!question)
@@ -60,7 +59,7 @@ const submitAnswer = async (req) => {
                 if(isAnswerValid)
                     player.final_score = player.final_score + 1;
                 player.update({
-                    final_score: player.final_score + 1,
+                    final_score: player.final_score,
                     questions: player.questions
                 });
             }
@@ -72,7 +71,8 @@ const submitAnswer = async (req) => {
         // end loop
         let responseData = {
             isCorrect: isAnswerValid,
-            nextQuestion: nextQuestion
+            nextQuestion: nextQuestion,
+            questionInterval: quizDetails.question_interval
         }
         if((quizDetails.no_of_questions - totalQuestionsPushedToTeam) == 0)
             responseData.nextQuestion = false;

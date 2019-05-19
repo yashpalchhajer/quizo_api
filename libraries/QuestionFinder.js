@@ -4,7 +4,7 @@ const CustomError = require('./customError');
 const quizTeam = require('../models').qa_quiz_teams;
 const questionMaster = require('../models').qa_question_masters;
 const playerQuestions = require("../models").qa_player_questions;
-
+const quizConfigs = require('../models').qa_quiz_configs;
 const findQuestion = async (req) => {
     try{
         const teamId = req.teamId;
@@ -56,7 +56,7 @@ const findQuestion = async (req) => {
                 return response;
             } else if((player.final_score + restQuestionsToPush) >= maxScore) {
                 winner = false;
-                break;
+                return false;
             }
         });
         if(winner) {
@@ -91,7 +91,6 @@ const findQuestion = async (req) => {
             if(filteredQuestions.length == 0)
                 throw new CustomError("No more unique question");
             finalQuestion = filteredQuestions[0];
-            finalQuestion.questionPushTime = new Date().getTime();
             if(playerOldQuestions.length != quizPlayerIds.length) {
                 let playerMap = new Map();
                 playerOldQuestions.forEach(playerQuestion => {
@@ -120,6 +119,7 @@ const findQuestion = async (req) => {
         await playerQuestions.insertPlayersQuestion(playerOldQuestions);
         await quizTeam.updatePushedQuestionsCount(playerIds, 1, teamId);
         console.log("time after selecting unique question -: "+Date());
+        finalQuestion.questionPushTime = new Date().getTime();
         response.data = finalQuestion;
         response.message = "Success";
         response.status = true;

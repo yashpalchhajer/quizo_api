@@ -122,5 +122,19 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
+  Players.getDetailsById = (id) => {
+    return new Promise((resolve, reject) => {
+      Players.findAll({
+        where: {
+          id: id
+        }
+      }).then((data) => {
+        return resolve(data);
+      }).catch(err => {
+        return reject(err);
+      })
+    });
+  }
+
   return Players;
 };

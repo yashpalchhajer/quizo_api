@@ -73,6 +73,7 @@ module.exports = (sequelize, DataTypes) => {
           raw: true,
           where: {
             id: quizId,
+            status: 'ACTIVE'
           }
         }
       ).then(quizData => {

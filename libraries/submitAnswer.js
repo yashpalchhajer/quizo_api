@@ -28,11 +28,18 @@ const submitAnswer = async (req) => {
         // fetch quiz config
         const quizDetails = await quizConfigs.checkExistance(quizPlayers[0].quiz_id);
         let totalQuestionsPushedToTeam = 0;
-        // start loop
+
         let nextQuestion = true;
+        // start loop
         quizPlayers.forEach(player => {
             // check is player submitted this question's answer
-            let oldQuestion = player.questions.some(answer => answer['questionId'] == req.questionId);
+            let oldQuestion = false;
+            
+            if(player.questions != null){
+                oldQuestion = player.questions.some(answer => {
+                    return answer['questionId'] == req.questionId
+                });
+            }
             // check player id and update on match
             if(player.player_id == req.playerId) {
                 // check is player active
@@ -52,7 +59,7 @@ const submitAnswer = async (req) => {
                 if(isAnswerValid)
                     player.final_score = player.final_score + 1;
                 player.update({
-                    final_score: player.final_score + 1,
+                    final_score: player.final_score,
                     questions: player.questions
                 });
             }
@@ -64,7 +71,8 @@ const submitAnswer = async (req) => {
         // end loop
         let responseData = {
             isCorrect: isAnswerValid,
-            nextQuestion: nextQuestion
+            nextQuestion: nextQuestion,
+            questionInterval: quizDetails.question_interval
         }
         if((quizDetails.no_of_questions - totalQuestionsPushedToTeam) == 0)
             responseData.nextQuestion = false;

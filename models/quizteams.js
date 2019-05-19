@@ -73,7 +73,6 @@ module.exports = (sequelize, DataTypes) => {
   QuizTeams.getTeamPlayersList = (teamId) => {
     return new Promise((resolve, reject) => {
       QuizTeams.findAll({
-        raw: true,
         where: {
           team_id: teamId
         }
@@ -114,7 +113,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   QuizTeams.getTeamPlayer = (playerId, teamId) => {
-    new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       QuizTeams.find({
         raw: true,
         where: {
@@ -128,7 +127,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   QuizTeams.updatePushedQuestionsCount = (playerIds, count, teamId) => {
-    new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       QuizTeams.update({
         pushed_questions: Sequelize.literal(' pushed_questions + ' + count)
       }, {

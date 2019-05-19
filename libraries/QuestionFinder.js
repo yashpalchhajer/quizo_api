@@ -4,7 +4,6 @@ const CustomError = require('./customError');
 const quizTeam = require('../models').qa_quiz_teams;
 const questionMaster = require('../models').qa_question_masters;
 const playerQuestions = require("../models").qa_player_questions;
-const date = require('date-and-time');
 
 const findQuestion = async (req) => {
     try{
@@ -14,12 +13,59 @@ const findQuestion = async (req) => {
         let quizPlayerIds = await quizTeam.getTeamPlayersList(teamId);
         if(!quizPlayerIds)
             throw new CustomError("No player found as per team");
+        let response = { error: false, status: false, message: 'Winner' };
+        //winner work
+        console.log("time before selecting winner -: " + Date());
+        if(quizPlayerIds.length == 1)
+            response.data = quizPlayerIds[0];
+        let maxScore = 0;
+        let minAnswerTime = 0;
+        let totalQuestionsPushedToTeam = 0;
+
         const playerIds = [];
         let quizId;
+        let winnerPlayerId = 0;
+        let playersAnswerTime = new Map();
         quizPlayerIds.forEach(player => {
+            let playerAnswerTime = 0;
+            if(player.questions != null)
+                playersAnswerTime.set(player.player_id,player.questions.reduce((totalSum,answer) => totalSum + (answer['answerTime'] || 0),0));
+            if(maxScore == player.final_score) {
+                winnerPlayerId = player.player_id;
+                if(minAnswerTime == 0 || (minAnswerTime > playerAnswerTime)) {
+                    minAnswerTime = playerAnswerTime;
+                }
+            } else if(maxScore < player.final_score) {
+                winnerPlayerId = player.player_id;
+                maxScore = player.final_score;
+                minAnswerTime = playerAnswerTime;
+            }
             playerIds.push(player.player_id);
             quizId = player.quiz_id;
+            if(totalQuestionsPushedToTeam < player.pushed_questions)
+                totalQuestionsPushedToTeam = player.pushed_questions;
         });
+        const quizDetails = await quizConfigs.checkExistance(quizId);
+        let restQuestionsToPush = quizDetails.no_of_questions - totalQuestionsPushedToTeam;
+        let winner = true;
+        quizPlayerIds.forEach(player => {
+            let playerAnswerTime = playersAnswerTime.get(player.player_id);
+            if((player.final_score == maxScore) && (restQuestionsToPush == 0) && (playerAnswerTime == minAnswerTime)) {
+                response.message = "Draw";
+                response.data = quizPlayerIds;
+                return response;
+            } else if((player.final_score + restQuestionsToPush) >= maxScore) {
+                winner = false;
+                break;
+            }
+        });
+        if(winner) {
+            response.data = quizPlayerIds;
+            response.data.winnerId = winnerPlayerId;
+            return response;
+        }
+        console.log("time after selecting winner -: " + Date());
+
         let playerOldQuestions = await playerQuestions.fetchPlayersQuestions(playerIds, quizId);
         const questions = await questionMaster.fetchQuizWiseQuestions(quizId);
         if(questions.length == 0)
@@ -53,7 +99,6 @@ const findQuestion = async (req) => {
                 });
                 quizPlayerIds.forEach(playerId => {
                     let player = playerMap.get(playerId.player_id);
-                    console.log(player);
                     if(player == null) {
                         player = {
                             player_id : playerId.player_id,
@@ -75,7 +120,10 @@ const findQuestion = async (req) => {
         await playerQuestions.insertPlayersQuestion(playerOldQuestions);
         await quizTeam.updatePushedQuestionsCount(playerIds, 1, teamId);
         console.log("time after selecting unique question -: "+Date());
-        return { error: false, status: true, message: 'Success',data: finalQuestion };
+        response.data = finalQuestion;
+        response.message = "Success";
+        response.status = true;
+        return response;
     }catch(error){
         if (error instanceof CustomError) {
             return { error: true, status: false, message: error.message };

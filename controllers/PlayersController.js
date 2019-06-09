@@ -90,29 +90,29 @@ const verifyAuthOtp = async (req, res) => {
         /**
          * OTP CHeck bypass
          */
-        if (process.env.OTP_VERIFY) {
+        if (process.env.OTP_VERIFY == true) {
 
-            const otpData = await OTPToken.checkOTP(reqBody);
 
-            if (!otpData) {
-                return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
-            }
+	        const otpData = await OTPToken.checkOTP(reqBody);
 
-            otpData.update({ is_valid: false });
+        	if (!otpData) {
+	            return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
+        	}
 
-            /** get date dfference 
-             * NEED TO ADD IN LIBRARY
-            */
-            const generateTime = otpData.createdAt;
-            const current = new Date();
-            const diffMs = (current - generateTime); // milliseconds between now & Christmas
-            const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+	        otpData.update({ is_valid: false });
 
-            if (diffMins > process.env.OTP_EXP_LIMIT) {
-                return res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
-            }
-        }
-        
+        /** get date dfference 
+         * NEED TO ADD IN LIBRARY
+        */
+	        const generateTime = otpData.createdAt;
+	        const current = new Date();
+	        const diffMs = (current - generateTime); // milliseconds between now & Christmas
+	        const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+
+	        if (diffMins > process.env.OTP_EXP_LIMIT) {
+	            return res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
+	        }
+	}
         let accesToken = await EncryptLib.getAccessToken(playerData);
         playerData.update({ is_otp_verified: 'YES' });
 

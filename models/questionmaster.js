@@ -53,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
         where: {
           quiz_id: quizId
         },
-        attributes: { exclude: ['answer', 'createdAt', 'updatedAt', 'quiz_id'] }
+        attributes: { exclude: ['createdAt', 'updatedAt', 'quiz_id'] }
       }).then((questionsList) => resolve(questionsList))
         .catch((err) => {
           reject(err)

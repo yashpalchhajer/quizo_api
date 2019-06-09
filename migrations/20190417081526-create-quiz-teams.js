@@ -19,6 +19,11 @@ module.exports = {
         type: Sequelize.INTEGER(11),
         allowNull: false
       },
+      player_status:{
+        type: Sequelize.ENUM('ACTIVE','INACTIVE'),
+        allowNull: false,
+        defaultValue: 'ACTIVE'
+      },
       quiz_id: {
         type: Sequelize.INTEGER(11),
         allowNull: false,

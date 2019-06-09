@@ -22,7 +22,7 @@ const submitAnswer = async (req) => {
         if(req.answer != question.answer)
             isAnswerValid = false;
         // fetch team players array 
-        let quizPlayers = await quizTeam.getTeamPlayersList(req.teamId);
+        let quizPlayers = await quizTeam.getTeamActivePlayersList(req.teamId);
         if(!quizPlayers)
             throw new CustomError("Invalid team");
         // fetch quiz config

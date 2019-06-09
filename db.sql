@@ -66,3 +66,6 @@ ALTER TABLE `qa_quiz_teams` CHANGE `final_score` `final_score` INT(11) DEFAULT 0
 ALTER TABLE `qa_quiz_teams` ADD COLUMN `pushed_questions` INT(11) DEFAULT 0 NOT NULL AFTER `final_score`;
 
 
+/** 20 May */
+ALTER TABLE `qa_quiz_teams` ADD `player_status` ENUM('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE' AFTER `quiz_id`;
+

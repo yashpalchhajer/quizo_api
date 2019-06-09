@@ -35,6 +35,11 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'restrict',
       onUpdate: 'no action'
     },
+    player_status:{
+      type: DataTypes.ENUM('ACTIVE','INACTIVE'),
+      allowNull: false,
+      defaultValue: 'ACTIVE'
+    },
     questions: {
       type: DataTypes.JSON,
       allowNull: true,
@@ -70,11 +75,12 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
-  QuizTeams.getTeamPlayersList = (teamId) => {
+  QuizTeams.getTeamActivePlayersList = (teamId) => {
     return new Promise((resolve, reject) => {
       QuizTeams.findAll({
         where: {
-          team_id: teamId
+          team_id: teamId,
+          player_status: 'ACTIVE'
         }
       })
         .then((playersList) => resolve(playersList))

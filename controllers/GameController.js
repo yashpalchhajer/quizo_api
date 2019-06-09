@@ -15,9 +15,20 @@ const requestToPlay = async (req) => {
 
     // parameter added
 
+    if(!reqBody.hasOwnProperty('state')){
+        reqBody.state = 1;
+    }
+
+
+    /**
+     * state    
+     *      1 NEW
+     *      2 Check
+     */
     const rules = {
         contact_number: 'required|min:10|max:10',
-        quiz_id: 'required|numeric'
+        quiz_id: 'required|numeric',
+        state: 'required|in:1,2'
     };
 
     let validator = new Validator(reqBody, rules);
@@ -59,6 +70,8 @@ const requestToPlay = async (req) => {
             let TeamMembersIds = await QuizTeam.getAllPlayersIds(prevEntry[0].team_id);
             let playerNames = await Player.getDetails(TeamMembersIds.map(p => p.player_id));
 
+            const isSystem = !Object.values(playerNames).findIndex((data) => {return ( (data.name).toUpperCase() == ('system').toUpperCase() )});
+
             const resp = {
                 teamId: prevEntry[0].team_id,
                 player: {
@@ -69,7 +82,8 @@ const requestToPlay = async (req) => {
                 quizInfo: {
                     no_of_questions: QuizData.no_of_questions,
                     quiz_duration: QuizData.no_of_questions,
-                    question_interval: QuizData.question_interval
+                    question_interval: QuizData.question_interval,
+                    isSystem:isSystem
                 }
             };
             global.io.sockets.connected[reqBody.socket_id].emit('teamResp', resp);
@@ -83,23 +97,28 @@ const requestToPlay = async (req) => {
     }
 
 
-    /** checked players running quizes */
-    let playerAvailable = await PlayerAvailability.checkExistance(playerData);
+    if(reqBody.hasOwnProperty('state') && reqBody.state == 2){
+        console.log('to check status');
+        /** for future */
+    }else{
+        /** checked players running quizes */
+        let playerAvailable = await PlayerAvailability.checkExistance(playerData);
 
-    if (playerAvailable) {
-        let err = { error: true, status: 'FAILED', message: "Player already requested for play" };
-        playerAvailable.update({ connection_id: reqBody.socket_id });
-        global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
-        // console.log('Player has been already requested for play');
-        return false;
+        if (playerAvailable) {
+            let err = { error: true, status: 'FAILED', message: "Player already requested for play" };
+            playerAvailable.update({ connection_id: reqBody.socket_id });
+            global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
+            // console.log('Player has been already requested for play');
+            return false;
+        }
     }
-
     /** check player availability and make team to play */
 
     let reqdata = {
         playerId: playerData.id,
         quizId: reqBody.quiz_id,
-        connectionId: reqBody.socket_id
+        connectionId: reqBody.socket_id,
+        state: reqBody.state
     };
 
     let teamResp = await TeamBuilder(reqdata);
@@ -115,6 +134,8 @@ const requestToPlay = async (req) => {
                 allPlayerData = await Player.getDetails(teamResp.data.playerIds);
             }
 
+            const isSystem = !Object.values(allPlayerData).findIndex((data) => {return ( (data.name).toUpperCase() == ('system').toUpperCase() )});
+
             teamResp.data.players.forEach((player) => {
                 let resp = {
                     teamId: teamResp.data.teamId,
@@ -123,10 +144,13 @@ const requestToPlay = async (req) => {
                     quizInfo: {
                         no_of_questions: QuizData.no_of_questions,
                         quiz_duration: QuizData.no_of_questions,
-                        question_interval: QuizData.question_interval
+                        question_interval: QuizData.question_interval,
+                        isSystem:isSystem
                     }
                 };
-                global.io.sockets.connected[player.connectionId].emit('teamResp', resp);
+                if(player.playerId != 0){
+                    global.io.sockets.connected[player.connectionId].emit('teamResp', resp);
+                }
             });
         }
     }
@@ -136,11 +160,11 @@ const requestToPlay = async (req) => {
 }
 
 const scheduleQuestion = async (request) => {
-    let counter = 0;
-    if (global.io.sockets.adapter.rooms[request.teamId].length != 2) {
-        return true
+    if(!request.quizInfo.isSystem){
+        if (global.io.sockets.adapter.rooms[request.teamId].length != 2) {
+            return true
+        }
     }
-    let startTime = new Date(Date.now());
 
     if (global.schedulledJobs.indexOf(request.teamId) != -1) {
         return true;
@@ -183,6 +207,13 @@ const sendQuestion = async (quesReq) => {
      *  if Winnner is then notify for Winner
      */
 
+    if(question.hasOwnProperty('error') && question.error == false){
+        // also check multiple checks acc to response
+        if(question.message != 'Success'){
+            clearInterval(quesReq.teamId);
+        }
+    }
+
     global.io.sockets.in(quesReq.teamId).emit('fireQuest', question);
 }
 
@@ -221,10 +252,11 @@ const submitUserAnswer = async (req, res) => {
                 /** Fire Event for Answer submit */
                 responseData.data = {
                     playerId: playerData.id,
+                    playerName: playerData.name,
                     isCorrect: submitResp.data.isCorrect
                 };
                 global.io.sockets.in(reqBody.teamId).emit('notifyTeam', responseData);
-                console.log(submitResp);
+
                 if(submitResp.data.nextQuestion == true){
                     clearInterval(global.schedulledJobs[reqBody.teamId]);
                     let questReq = {
@@ -254,6 +286,49 @@ const submitUserAnswer = async (req, res) => {
     }
 }
 
+const quitGame = async (req,res) => {
+
+    try{
+        /**
+         * TODO
+         * 
+         * validate request
+         * 
+         * check player
+         * check Team ,room ID
+         * 
+         * INACTIVE in team
+         * 
+         * remove from Room (socket)
+         * 
+         * get winner state (acc to no of player available in team)
+         */
+
+        let reqBody = req.body;
+
+        const rules = {
+            contact_number: 'required|min:10|max:10',
+        };
+
+        const validator = new Validator(reqBody,rules);
+
+        if(validator.fails()){
+            return res.status(204).json({error: true,status: 'FAILED',message: 'Validation Errors!',validation: validator.rules});
+        }
+
+        /** check player */
+
+        let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
+        if (!playerData) {
+            return res.status(401).json({ error: true, status: 'FAILED', message: "Player you ar looking for is not found" });
+        }
+
+        /** check in team make global function */
+
+    }catch(err){
+        console.log(err);
+    }
+}
 module.exports = {
     requestToPlay,
     scheduleQuestion,

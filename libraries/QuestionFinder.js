@@ -10,7 +10,7 @@ const findQuestion = async (req) => {
         const teamId = req.teamId;
         console.log("time before selecting unique question -: " + Date());
         // have to check only active team players and get only active players
-        let quizPlayerIds = await quizTeam.getTeamPlayersList(teamId);
+        let quizPlayerIds = await quizTeam.getTeamActivePlayersList(teamId);
         if(!quizPlayerIds)
             throw new CustomError("No player found as per team");
         let response = { error: false, status: false, message: 'Winner' };

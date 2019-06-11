@@ -136,6 +136,9 @@ const requestToPlay = async (req) => {
 
             const isSystem = !Object.values(allPlayerData).findIndex((data) => {return ( (data.name).toUpperCase() == ('system').toUpperCase() )});
 
+		console.log('team resp');
+		console.log(isSystem);
+
             teamResp.data.players.forEach((player) => {
                 let resp = {
                     teamId: teamResp.data.teamId,
@@ -148,6 +151,8 @@ const requestToPlay = async (req) => {
                         isSystem:isSystem
                     }
                 };
+		    console.log('player connetion---------------------');
+		    console.log(player.connectionId);
                 if(player.playerId != 0){
                     global.io.sockets.connected[player.connectionId].emit('teamResp', resp);
                 }

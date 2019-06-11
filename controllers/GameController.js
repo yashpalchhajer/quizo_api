@@ -252,8 +252,8 @@ const submitUserAnswer = async (req, res) => {
                 /** Fire Event for Answer submit */
                 responseData.data = {
                     playerId: playerData.id,
-                    playerName: playerData.name,
-                    isCorrect: submitResp.data.isCorrect
+		    playerName: playerData.name,
+	   	    isCorrect: submitResp.data.isCorrect
                 };
                 global.io.sockets.in(reqBody.teamId).emit('notifyTeam', responseData);
 

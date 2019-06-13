@@ -13,7 +13,7 @@ const findQuestion = async (req) => {
         let quizPlayerIds = await quizTeam.getTeamActivePlayersList(teamId);
         if(!quizPlayerIds)
             throw new CustomError("No player found as per team");
-        let response = { error: false, status: false, message: 'Winner' };
+        let response = { error: false, status: false, message: 'Winner', code: 0 };
         //winner work
         console.log("time before selecting winner -: " + Date());
         if(quizPlayerIds.length == 1)
@@ -26,46 +26,66 @@ const findQuestion = async (req) => {
         let quizId;
         let winnerPlayerId = 0;
         let playersAnswerTime = new Map();
+        quizId = quizPlayerIds[0].quiz_id;
+        const quizDetails = await quizConfigs.checkExistance(quizId);
         quizPlayerIds.forEach(player => {
             let playerAnswerTime = 0;
             if(player.questions != null)
-                playersAnswerTime.set(player.player_id,player.questions.reduce((totalSum,answer) => totalSum + (answer['answerTime'] || 0),0));
+                playerAnswerTime = player.questions.reduce((totalSum,answer) => totalSum + (answer['answerTime'] || 0),0);
+            playersAnswerTime.set(player.player_id, playerAnswerTime);
             if(maxScore == player.final_score) {
                 winnerPlayerId = player.player_id;
-                if(minAnswerTime == 0 || (minAnswerTime > playerAnswerTime)) {
+                if(minAnswerTime == 0 || (playerAnswerTime < minAnswerTime)) {
                     minAnswerTime = playerAnswerTime;
                 }
-            } else if(maxScore < player.final_score) {
+            } else if(player.final_score > maxScore) {
                 winnerPlayerId = player.player_id;
                 maxScore = player.final_score;
                 minAnswerTime = playerAnswerTime;
             }
             playerIds.push(player.player_id);
-            quizId = player.quiz_id;
             if(totalQuestionsPushedToTeam < player.pushed_questions)
                 totalQuestionsPushedToTeam = player.pushed_questions;
         });
-        const quizDetails = await quizConfigs.checkExistance(quizId);
-        let restQuestionsToPush = quizDetails.no_of_questions - totalQuestionsPushedToTeam;
+        let totalQuestionInQuiz = quizDetails.no_of_questions;
+        let restQuestionsToPush = totalQuestionInQuiz - totalQuestionsPushedToTeam;
         let winner = true;
+        console.log("minAnswerTime ",minAnswerTime);
         quizPlayerIds.forEach(player => {
             let playerAnswerTime = playersAnswerTime.get(player.player_id);
-            if((player.final_score == maxScore) && (restQuestionsToPush == 0) && (playerAnswerTime == minAnswerTime)) {
+            console.log("playerAnswerTime ",playerAnswerTime);
+            console.log("maxScore ",maxScore);
+            console.log("player.player_id ", player.player_id);
+            console.log("player.final_score ", player.final_score);
+            if(restQuestionsToPush == 0 && player.questions != null) {
+                if(totalQuestionInQuiz != player.questions.length) {
+                    let questionsDifference = totalQuestionInQuiz - player.questions.length;
+                    playerAnswerTime = playerAnswerTime + questionsDifference * quizDetails.question_interval * 1000;
+                    playersAnswerTime.set(player.player_id, playerAnswerTime);
+                }
+            }
+            if((winnerPlayerId != player.player_id) && (player.final_score == maxScore) && (restQuestionsToPush == 0) && (playerAnswerTime == minAnswerTime)) {
                 response.message = "Draw";
+                response.code = 1;
                 response.data = quizPlayerIds;
                 return response;
-            } else if((player.final_score + restQuestionsToPush) >= maxScore) {
+            } else if((winnerPlayerId != player.player_id) && (player.final_score + restQuestionsToPush) > maxScore) {
                 winner = false;
                 return false;
             }
         });
+        console.log("playerAnswerTime", playersAnswerTime);
+        console.log("winnerPlayerId ",winnerPlayerId);
         if(winner) {
+            response.code = 2;
             response.data = quizPlayerIds;
-            response.data.winnerId = winnerPlayerId;
+            response.winnerId = winnerPlayerId;
+            //console.log(response);
             return response;
         }
 
         if(restQuestionsToPush == 0){
+            console.log(response);
             throw new CustomError('All Questions Done!');
         }
 
@@ -129,10 +149,10 @@ const findQuestion = async (req) => {
         return response;
     }catch(error){
         if (error instanceof CustomError) {
-            return { error: true, status: false, message: error.message };
+            return { error: true, status: false, message: error.message, code: 1000 };
         } else {
             console.log(error);
-            return { error: true, status: false, message: "Fail to find question " + error.message };
+            return { error: true, status: false, message: "Fail to find question " + error.message, code: 1000 };
         }
     }
 

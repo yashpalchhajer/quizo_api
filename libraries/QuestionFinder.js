@@ -69,7 +69,7 @@ const findQuestion = async (req) => {
                 response.code = 1;
                 response.data = quizPlayerIds;
                 return response;
-            } else if((winnerPlayerId != player.player_id) && (player.final_score + restQuestionsToPush) > maxScore) {
+            } else if((winnerPlayerId != player.player_id) && (restQuestionsToPush != 0) && (player.final_score + restQuestionsToPush) >= maxScore) {
                 winner = false;
                 return false;
             }

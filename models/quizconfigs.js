@@ -79,6 +79,7 @@ module.exports = (sequelize, DataTypes) => {
       ).then(quizData => {
         resolve(quizData);
       }).catch(err => {
+        console.log(err);
         reject(err);
       });
     });

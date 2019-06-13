@@ -8,32 +8,32 @@ const CustomError = require('./customError');
 const TeamBuilder = async (req) => {
     try {
 
-        const quizDetails = await quizConfigs.checkExistance(req.quizId);
+        const quizDetails = req.quizConfigs;
         if(!quizDetails)
             throw new CustomError("Invalid quiz");
         if ("ACTIVE" == quizDetails.status) {
-            await playerAvailability.registerPlayerRequest(req.playerId, req.quizId,req.connectionId);
-            let availablePlayersList = await playerAvailability.fetchFreePlayersQuizWise(req.quizId);
+            await playerAvailability.registerPlayerRequest(req.playerId, quizDetails.id,req.connectionId);
+            let availablePlayersList = await playerAvailability.fetchFreePlayersQuizWise(quizDetails.id);
             if (availablePlayersList.count == 0){
                 throw new CustomError("No other player exist for requested quiz");
             }
             if (availablePlayersList.count < quizDetails.min_members){
                 if(quizDetails.min_members == 2  && req.state == 2){
-                    await playerAvailability.registerPlayerRequest(0, req.quizId,'system');
-                    availablePlayersList = await playerAvailability.fetchFreePlayersQuizWise(req.quizId);
+                    await playerAvailability.registerPlayerRequest(0, quizDetails.id,'system');
+                    availablePlayersList = await playerAvailability.fetchFreePlayersQuizWise(quizDetails.id);
                 }else{
                     throw new CustomError("No minimum members");
                 }
             }
             
-            let teamId = req.quizId + Date.now();
+            let teamId = quizDetails.id + Date.now();
             const teamData = [];
             const updatePlayer = [];
             const responsePlayerData = [];
             availablePlayersList.rows.forEach(player => {
                 let teamPlayer = {
                     player_id: player.player_id,
-                    quiz_id: req.quizId,
+                    quiz_id: quizDetails.id,
                     team_id: teamId
                 };
                 let playerData = {
@@ -44,7 +44,7 @@ const TeamBuilder = async (req) => {
                 updatePlayer.push(player.player_id);
                 teamData.push(teamPlayer);
             })
-            await playerAvailability.updatePlayersWithTeam(updatePlayer, req.quizId, "FALSE", teamId);
+            await playerAvailability.updatePlayersWithTeam(updatePlayer, quizDetails.id, "FALSE", teamId);
             await quizTeam.registerNewTeam(teamData);
             let responseData = {
                 teamId: teamId,

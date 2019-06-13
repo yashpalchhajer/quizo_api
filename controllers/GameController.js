@@ -116,9 +116,9 @@ const requestToPlay = async (req) => {
 
     let reqdata = {
         playerId: playerData.id,
-        quizId: reqBody.quiz_id,
         connectionId: reqBody.socket_id,
-        state: reqBody.state
+        state: reqBody.state,
+        quizConfig: QuizData
     };
 
     let teamResp = await TeamBuilder(reqdata);

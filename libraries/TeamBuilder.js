@@ -8,7 +8,7 @@ const CustomError = require('./customError');
 const TeamBuilder = async (req) => {
     try {
 
-        const quizDetails = req.quizConfigs;
+        const quizDetails = req.quizConfig;
         if(!quizDetails)
             throw new CustomError("Invalid quiz");
         if ("ACTIVE" == quizDetails.status) {

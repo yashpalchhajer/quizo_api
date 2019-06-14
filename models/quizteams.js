@@ -40,6 +40,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'ACTIVE'
     },
+    quit_time:{
+      type: DataTypes.DATE,
+      defaultValue: null,
+      allowNull: true
+    },
     questions: {
       type: DataTypes.JSON,
       allowNull: true,

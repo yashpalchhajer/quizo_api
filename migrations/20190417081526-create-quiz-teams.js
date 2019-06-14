@@ -24,6 +24,11 @@ module.exports = {
         allowNull: false,
         defaultValue: 'ACTIVE'
       },
+      quit_time:{
+        type: Sequelize.DATE,
+        defaultValue: null,
+        allowNull: true
+      },
       quiz_id: {
         type: Sequelize.INTEGER(11),
         allowNull: false,

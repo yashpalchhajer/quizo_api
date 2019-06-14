@@ -40,7 +40,7 @@ module.exports = {
         defaultValue: 0
       },
       quiz_duration:{
-        type:Sequelize.INTEGER(3),
+        type:Sequelize.DOUBLE(5,2),
         allowNull:false
       },
       no_of_questions:{
@@ -48,7 +48,7 @@ module.exports = {
         allowNull:false
       },
       question_interval:{
-        type:Sequelize.INTEGER(3),
+        type:Sequelize.DOUBLE(5,2),
         allowNull:false
       },
       status: {

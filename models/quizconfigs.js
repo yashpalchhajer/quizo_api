@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0
     },
     quiz_duration: {
-      type: DataTypes.INTEGER(3),
+      type: DataTypes.DOUBLE(5,2),
       allowNull: false
     },
     no_of_questions: {
@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     question_interval: {
-      type: DataTypes.INTEGER(3),
+      type: DataTypes.DOUBLE(5,2),
       allowNull: false
     },
     status: {

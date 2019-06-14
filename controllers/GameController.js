@@ -7,7 +7,7 @@ const findQuestion = require('../libraries/QuestionFinder');
 const QuizTeam = require('../models').qa_quiz_teams;
 const QuizConfigs = require('../models').qa_quiz_configs;
 const DateHelpers = require('../libraries/DateHandlers');
-let schedular = require('node-schedule');
+
 const SubmitAnswer = require('../libraries/submitAnswer');
 
 const requestToPlay = async (req) => {
@@ -15,7 +15,7 @@ const requestToPlay = async (req) => {
 
     // parameter added
 
-    if(!reqBody.hasOwnProperty('state')){
+    if (!reqBody.hasOwnProperty('state')) {
         reqBody.state = 1;
     }
 
@@ -70,7 +70,7 @@ const requestToPlay = async (req) => {
             let TeamMembersIds = await QuizTeam.getAllPlayersIds(prevEntry[0].team_id);
             let playerNames = await Player.getDetails(TeamMembersIds.map(p => p.player_id));
 
-            const isSystem = !Object.values(playerNames).findIndex((data) => {return ( (data.name).toUpperCase() == ('system').toUpperCase() )});
+            const isSystem = !Object.values(playerNames).findIndex((data) => { return ((data.name).toUpperCase() == ('system').toUpperCase()) });
 
             const resp = {
                 teamId: prevEntry[0].team_id,
@@ -83,7 +83,7 @@ const requestToPlay = async (req) => {
                     no_of_questions: QuizData.no_of_questions,
                     quiz_duration: QuizData.no_of_questions,
                     question_interval: QuizData.question_interval,
-                    isSystem:isSystem
+                    isSystem: isSystem
                 }
             };
             global.io.sockets.connected[reqBody.socket_id].emit('teamResp', resp);
@@ -97,10 +97,10 @@ const requestToPlay = async (req) => {
     }
 
 
-    if(reqBody.hasOwnProperty('state') && reqBody.state == 2){
+    if (reqBody.hasOwnProperty('state') && reqBody.state == 2) {
         console.log('to check status');
         /** for future */
-    }else{
+    } else {
         /** checked players running quizes */
         let playerAvailable = await PlayerAvailability.checkExistance(playerData);
 
@@ -121,6 +121,7 @@ const requestToPlay = async (req) => {
         quizConfig: QuizData
     };
 
+    console.log('Request data ----------', reqdata);
     let teamResp = await TeamBuilder(reqdata);
     // console.log("teamBuilder response-: ");
     // console.log(+teamResp);
@@ -134,10 +135,7 @@ const requestToPlay = async (req) => {
                 allPlayerData = await Player.getDetails(teamResp.data.playerIds);
             }
 
-            const isSystem = !Object.values(allPlayerData).findIndex((data) => {return ( (data.name).toUpperCase() == ('system').toUpperCase() )});
-
-		console.log('team resp');
-		console.log(isSystem);
+            const isSystem = !Object.values(allPlayerData).findIndex((data) => { return ((data.name).toUpperCase() == ('system').toUpperCase()) });
 
             teamResp.data.players.forEach((player) => {
                 let resp = {
@@ -148,12 +146,10 @@ const requestToPlay = async (req) => {
                         no_of_questions: QuizData.no_of_questions,
                         quiz_duration: QuizData.no_of_questions,
                         question_interval: QuizData.question_interval,
-                        isSystem:isSystem
+                        isSystem: isSystem
                     }
                 };
-		    console.log('player connetion---------------------');
-		    console.log(player.connectionId);
-                if(player.playerId != 0){
+                if (player.playerId != 0) {
                     global.io.sockets.connected[player.connectionId].emit('teamResp', resp);
                 }
             });
@@ -165,7 +161,7 @@ const requestToPlay = async (req) => {
 }
 
 const scheduleQuestion = async (request) => {
-    if(!request.quizInfo.isSystem){
+    if (!request.quizInfo.isSystem) {
         if (global.io.sockets.adapter.rooms[request.teamId].length != 2) {
             return true
         }
@@ -180,20 +176,10 @@ const scheduleQuestion = async (request) => {
     let questReq = {
         'teamId': request.teamId
     };
-    sendQuestion(questReq);
+    await sendQuestion(questReq);
 
     global.schedulledJobs[request.teamId] = setQueInterval(questReq, request.quizInfo.question_interval);
 
-    // global.schedulledJobs[request.teamId] = schedular.scheduleJob({ start: startTime, end: endTime, rule: '0-59/30 * * * * *' }, async (data) => {
-    //     counter++;
-    //     let questReq = {
-    //         'teamId': request.teamId
-    //     };
-    //     const question = await findQuestion(questReq);
-
-    //     /** #TODO check response if required */
-    //     global.io.sockets.in(roomId).emit('fireQuest', question);
-    // });
     console.log('job schedulled schedullar');
     console.log(global.schedulledJobs);
 }
@@ -212,14 +198,41 @@ const sendQuestion = async (quesReq) => {
      *  if Winnner is then notify for Winner
      */
 
-    if(question.hasOwnProperty('error') && question.error == false){
+    console.log('****** Question ************', question);
+    if (question.hasOwnProperty('error') && question.error == false) {
         // also check multiple checks acc to response
-        if(question.message != 'Success'){
+        if (question.code == 0) {
+            clearInterval(global.schedulledJobs[quesReq.teamId]);
+            global.io.sockets.to(quesReq.teamId).emit('fireQuest', question);
+        } else if (question.code == 1) {
+            // draw
+            global.io.sockets.to(quesReq.teamId).emit('showWinner', question);
+            endGame(quesReq.teamId);
+        } else if (question.code == 2) {
+            // winner
+            global.io.sockets.to(quesReq.teamId).emit('showWinner', question);
+            endGame(quesReq.teamId);
+        } else if (question.code == 1000) {
+            // error
+        }
+        
+        if (question.message != 'Success') {
             clearInterval(quesReq.teamId);
         }
     }
+}
 
-    global.io.sockets.in(quesReq.teamId).emit('fireQuest', question);
+const endGame = async (teamId) => {
+
+    // clear interval 
+    console.log('--------- Before end game -----------');
+    // console.log('sch array',global.schedulledJobs)
+    // console.log('schedulled jobs ',global.schedulledJobs[teamId]);
+    clearInterval(global.schedulledJobs[teamId]);
+    global.schedulledJobs.splice(global.schedulledJobs.indexOf(teamId), 1);
+    // console.log('**************after end game ***************');
+    // console.log(global.schedulledJobs);
+    return true;
 }
 
 const submitUserAnswer = async (req, res) => {
@@ -240,7 +253,7 @@ const submitUserAnswer = async (req, res) => {
             return res.status(200).json({ error: true, status: 'FAILED', message: 'Validation Errors!', validation: validator.errors });
         }
 
-        let playerData = await Player.getDetailsById(reqBody.playerId);
+        const playerData = await Player.getDetailsById(reqBody.playerId);
 
         if (!playerData) {
             return res.status(200).json({ error: true, status: 'FAILED', message: 'No Player Found With ID' });
@@ -252,17 +265,18 @@ const submitUserAnswer = async (req, res) => {
             status: 'SUCCESS'
         };
 
-        if(submitResp.hasOwnProperty('error') && submitResp.error == false){
-            if(submitResp.status == true){
+        if (submitResp.hasOwnProperty('error') && submitResp.error == false) {
+            if (submitResp.status == true) {
                 /** Fire Event for Answer submit */
+
                 responseData.data = {
-                    playerId: playerData.id,
-		    playerName: playerData.name,
-	   	    isCorrect: submitResp.data.isCorrect
+                    playerId: playerData[0].id,
+                    playerName: playerData[0].name,
+                    isCorrect: submitResp.data.isCorrect
                 };
                 global.io.sockets.in(reqBody.teamId).emit('notifyTeam', responseData);
 
-                if(submitResp.data.nextQuestion == true){
+                if (submitResp.data.nextQuestion == true) {
                     clearInterval(global.schedulledJobs[reqBody.teamId]);
                     let questReq = {
                         'teamId': reqBody.teamId
@@ -270,17 +284,14 @@ const submitUserAnswer = async (req, res) => {
                     console.log('New Question Fired');
                     sendQuestion(questReq);
                     global.schedulledJobs[reqBody.teamId] = setQueInterval(questReq, submitResp.data.questionInterval);
-                    console.log(global.schedulledJobs);
                 }
-                
-            }else if(submitResp.status == false){
+
+            } else if (submitResp.status == false) {
                 // not submitted
             }
-        }else{
+        } else {
             // invalid resp
         }
-
-        console.log(submitResp);
 
         /** Check resp and call fire quest and schedule accordingly */
 
@@ -291,49 +302,65 @@ const submitUserAnswer = async (req, res) => {
     }
 }
 
-const quitGame = async (req,res) => {
+const quitGame = async (req, res) => {
 
-    try{
-        /**
-         * TODO
-         * 
-         * validate request
-         * 
-         * check player
-         * check Team ,room ID
-         * 
-         * INACTIVE in team
-         * 
-         * remove from Room (socket)
-         * 
-         * get winner state (acc to no of player available in team)
-         */
+    try {
 
         let reqBody = req.body;
 
         const rules = {
             contact_number: 'required|min:10|max:10',
+            teamId: 'required',
+            socket_id: 'required'
         };
 
-        const validator = new Validator(reqBody,rules);
+        const validator = new Validator(reqBody, rules);
 
-        if(validator.fails()){
-            return res.status(204).json({error: true,status: 'FAILED',message: 'Validation Errors!',validation: validator.rules});
+        if (validator.fails()) {
+            let err = { error: true, status: 'FAILED', message: 'Validation Errors!', validation: validator.rules };
+            global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
+            return false;
         }
 
         /** check player */
 
         let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
         if (!playerData) {
-            return res.status(401).json({ error: true, status: 'FAILED', message: "Player you ar looking for is not found" });
+            let err = { error: true, status: 'FAILED', message: "Player you are looking for is not found" };
+            global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
         }
 
         /** check in team make global function */
 
-    }catch(err){
+        let teamPlayer = QuizTeam.getTeamPlayer(playerData.id, reqBody.teamId);
+
+        if (!teamPlayer) {
+            let err = { error: true, status: 'FAILED', message: "Player is not playing this game." };
+            global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
+        }
+
+        teamPlayer.update({
+            player_status: 'INACTIVE',
+            quit_time: new Date()
+        });
+
+        let activePlayers = QuizTeam.getTeamActivePlayersList(teamPlayer.team_player);
+
+        if (!activePlayers) {
+            let res = { error: false, status: 'SUCCESS', message: "Game quit successfully." };
+            // notify team
+            global.io.sockets.connected[teamId].emit('showError', res);
+        }
+
+        if (activePlayers.length == 1) {
+            console.log('winner declaired');
+        }
+
+    } catch (err) {
         console.log(err);
     }
 }
+
 module.exports = {
     requestToPlay,
     scheduleQuestion,

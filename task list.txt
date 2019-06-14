@@ -40,3 +40,7 @@ res.data.players:{
 
 
 
+Error in 
+get Winner on all question done;
+
+

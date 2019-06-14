@@ -94,6 +94,11 @@ global.io.on('connection',function(socket){
         }
     });
 
+    socket.on('quitGame',function(request){
+        request.socket_id = socket.id;
+        GameController.quitGame(request);
+    });
+
     socket.on('disconnect',function(request){
         console.log('disconnects');
         console.log(global.io.sockets.adapter.rooms);

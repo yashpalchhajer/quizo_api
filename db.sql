@@ -69,3 +69,10 @@ ALTER TABLE `qa_quiz_teams` ADD COLUMN `pushed_questions` INT(11) DEFAULT 0 NOT 
 /** 20 May */
 ALTER TABLE `qa_quiz_teams` ADD `player_status` ENUM('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE' AFTER `quiz_id`;
 
+/** 12 Jun */
+ALTER TABLE `qa_quiz_teams` ADD `quit_time` DATETIME NULL AFTER `player_status`;
+
+ALTER TABLE `qa_quiz_configs`   
+	CHANGE `quiz_duration` `quiz_duration` DOUBLE(5,2) NOT NULL,
+	CHANGE `question_interval` `question_interval` DOUBLE(5,2) NOT NULL;
+

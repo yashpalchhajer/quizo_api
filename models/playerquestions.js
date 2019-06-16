@@ -69,7 +69,7 @@ module.exports = (sequelize, DataTypes) => {
           }
         }).then(updateCount => {
           if (updateCount[0] != 1)
-            throw new CustomError("Players questions are not updated");
+            throw new CustomError("Players questions are not updated", 16);
           resolve(updateCount);
         }).catch(err => {
           reject(err);

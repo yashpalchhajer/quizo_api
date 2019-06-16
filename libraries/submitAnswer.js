@@ -16,7 +16,7 @@ const submitAnswer = async (req) => {
         let question = await questionMaster.getQuestion(req.questionId);
         // if not exist  error
         if (!question)
-            throw new CustomError("Invalid question");
+            throw new CustomError("Invalid question", 7);
         let isAnswerValid = true;
         // verify answer if not match error
         if(req.answer != question.answer)
@@ -24,13 +24,14 @@ const submitAnswer = async (req) => {
         // fetch team players array 
         let quizPlayers = await quizTeam.getTeamActivePlayersList(req.teamId);
         if(!quizPlayers)
-            throw new CustomError("Invalid team");
+            throw new CustomError("Invalid team", 8);
         // fetch quiz config
         const quizDetails = await quizConfigs.checkExistance(quizPlayers[0].quiz_id);
         let totalQuestionsPushedToTeam = 0;
 
         let nextQuestion = true;
         // start loop
+        console.log("quiz players");
         quizPlayers.forEach(player => {
             // check is player submitted this question's answer
             let oldQuestion = false;
@@ -46,7 +47,7 @@ const submitAnswer = async (req) => {
                 if(!player.questions)
                 player.questions = [];
                 if(oldQuestion)
-                    throw new CustomError("Player already submitted this question's answer");
+                    throw new CustomError("Player already submitted this question's answer", 9);
                 oldQuestion = true;
                 let questionObj = {
                     questionId: req.questionId,
@@ -67,6 +68,9 @@ const submitAnswer = async (req) => {
                 totalQuestionsPushedToTeam = player.pushed_questions;
             if(nextQuestion)
                 nextQuestion = oldQuestion;
+            console.log("player ",player);
+            console.log("oldQuestion ",oldQuestion);
+            console.log("nextQuestion ",nextQuestion);
         });
         // end loop
         let responseData = {
@@ -76,14 +80,15 @@ const submitAnswer = async (req) => {
         }
         if((quizDetails.no_of_questions - totalQuestionsPushedToTeam) == 0)
             responseData.nextQuestion = false;
+        console.log("submit_answer ", responseData);
         console.log("time after submitting answer -: " + Date());
-        return { error: false, status: true, message: 'Success', data: responseData };
+        return { error: false, status: true, message: 'Success', data: responseData , code: 0 };
     } catch (error) {
         if (error instanceof CustomError) {
-            return { error: true, status: false, message: error.message };
+            return { error: true, status: false, message: error.message , code: error.code };
         } else {
             console.log(error);
-            return { error: true, status: false, message: "Error to submit answer " + error.message };
+            return { error: true, status: false, message: "Error to submit answer " + error.message, code: 1000 };
         }
     }
 

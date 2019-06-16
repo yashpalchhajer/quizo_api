@@ -35,12 +35,12 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'restrict',
       onUpdate: 'no action'
     },
-    player_status:{
-      type: DataTypes.ENUM('ACTIVE','INACTIVE'),
+    player_status: {
+      type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'TERMINATED'),
       allowNull: false,
       defaultValue: 'ACTIVE'
     },
-    quit_time:{
+    quit_time: {
       type: DataTypes.DATE,
       defaultValue: null,
       allowNull: true
@@ -98,7 +98,8 @@ module.exports = (sequelize, DataTypes) => {
       QuizTeams.findAll({
         raw: true,
         where: {
-          'player_id': id
+          'player_id': id,
+          'player_status': 'ACTIVE'
         },
         order: [['createdAt', 'DESC']],
         limit: 1
@@ -151,5 +152,23 @@ module.exports = (sequelize, DataTypes) => {
         }).catch(err => reject(err));
     });
   }
+
+  QuizTeams.terminateQuiz = (teamId) => {
+    return new Promise((resolve, reject) => {
+      QuizTeams.update(
+        {
+          status: 'TERMINATED'
+        },{
+          where:{
+            team_id: teamId,
+            status: 'ACTIVE'
+          }
+        }
+      ).then( (data) => {
+        resolve(data);
+      }).catch(err => reject(err));
+   });
+  }
+
   return QuizTeams;
 };

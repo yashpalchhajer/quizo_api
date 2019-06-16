@@ -76,7 +76,8 @@ const submitAnswer = async (req) => {
         let responseData = {
             isCorrect: isAnswerValid,
             nextQuestion: nextQuestion,
-            questionInterval: quizDetails.question_interval
+            questionInterval: quizDetails.question_interval,
+            restQuestionsToPush: quizDetails.no_of_questions - totalQuestionsPushedToTeam
         }
         if((quizDetails.no_of_questions - totalQuestionsPushedToTeam) == 0)
             responseData.nextQuestion = false;

@@ -76,3 +76,6 @@ ALTER TABLE `qa_quiz_configs`
 	CHANGE `quiz_duration` `quiz_duration` DOUBLE(5,2) NOT NULL,
 	CHANGE `question_interval` `question_interval` DOUBLE(5,2) NOT NULL;
 
+
+ALTER TABLE `quizo_api`.`qa_quiz_teams`   
+	CHANGE `player_status` `player_status` ENUM('ACTIVE','INACTIVE','TERMINATED') CHARSET latin1 COLLATE latin1_swedish_ci DEFAULT 'ACTIVE' NOT NULL;

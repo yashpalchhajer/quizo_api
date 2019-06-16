@@ -171,8 +171,6 @@ const scheduleQuestion = async (request) => {
         return true;
     }
 
-    global.schedulledJobs.push(request.teamId);
-
     let questReq = {
         'teamId': request.teamId
     };
@@ -192,30 +190,49 @@ const setQueInterval = (queReq, interval) => {
 };
 
 const sendQuestion = async (quesReq) => {
-    const question = await findQuestion(quesReq);
+    const question = await findQuestion.findQuestion(quesReq);
     /** Check question response and do acco
      *  if no question available then clearInterval
      *  if Winnner is then notify for Winner
      */
 
-    console.log('****** Question ************', question);
     if (question.hasOwnProperty('error') && question.error == false) {
         // also check multiple checks acc to response
         if (question.code == 0) {
             clearInterval(global.schedulledJobs[quesReq.teamId]);
             global.io.sockets.to(quesReq.teamId).emit('fireQuest', question);
-        } else if (question.code == 1) {
-            // draw
+        } else if (question.code == 1 || question.code == 2) {
+            // draw code 1
+            // winner code 2
             global.io.sockets.to(quesReq.teamId).emit('showWinner', question);
             endGame(quesReq.teamId);
-        } else if (question.code == 2) {
-            // winner
-            global.io.sockets.to(quesReq.teamId).emit('showWinner', question);
+        } else if (question.code == 6) {
+            // No more unique question
+
+            global.io.sockets.to(quesReq.teamId).emit('showError', question);
+
+            const getWinnner = await findQuestion.findWinner(quesReq);
+
+            if(getWinnner.hasOwnProperty('error') && getWinnner.error == false){
+                if(getWinnner.code == 0 || getWinnner.code == 1 || getWinnner.code == 2){
+                    global.io.sockets.to(quesReq.teamId).emit('showWinner', getWinnner);
+                    endGame(quesReq.teamId);
+                }else{
+                    global.io.sockets.to(quesReq.teamId).emit('showError', getWinnner);
+                    endGame(quesReq.teamId);
+                }
+            }else{
+                global.io.sockets.to(quesReq.teamId).emit('showError', getWinnner);
+            }
+
             endGame(quesReq.teamId);
+            await QuizTeam.terminateQuiz(quesReq.teamId);
+
         } else if (question.code == 1000) {
             // error
+            global.io.sockets.to(quesReq.teamId).emit('showError', getWinnner);
+            endGame(quesReq.teamId);
         }
-        
         if (question.message != 'Success') {
             clearInterval(quesReq.teamId);
         }
@@ -225,13 +242,14 @@ const sendQuestion = async (quesReq) => {
 const endGame = async (teamId) => {
 
     // clear interval 
-    console.log('--------- Before end game -----------');
-    // console.log('sch array',global.schedulledJobs)
-    // console.log('schedulled jobs ',global.schedulledJobs[teamId]);
+    const socketIds = Object.keys(global.io.sockets.adapter.rooms[teamId].sockets);
+    socketIds.forEach(socketId => {
+        global.io.sockets.connected[socketId].leave(teamId);
+    });
+
     clearInterval(global.schedulledJobs[teamId]);
-    global.schedulledJobs.splice(global.schedulledJobs.indexOf(teamId), 1);
-    // console.log('**************after end game ***************');
-    // console.log(global.schedulledJobs);
+    delete global.schedulledJobs[teamId];
+    console.log('Game ends ', teamId);
     return true;
 }
 
@@ -352,9 +370,24 @@ const quitGame = async (req, res) => {
             global.io.sockets.connected[teamId].emit('showError', res);
         }
 
-        if (activePlayers.length == 1) {
-            console.log('winner declaired');
+        let req = {
+            teamId: reqBody.teamId
+        };
+
+        const winnerList = await findQuestion.findWinner(req);
+
+        if(winnerList.hasOwnProperty('error') && winnerList.error == false){
+            if(winnerList.code == 1 || winnerList.code == 2){
+                global.io.sockets.to(reqBody.teamId).emit('showWinner', winnerList);
+                endGame(reqBody.teamId);
+            }else{
+                global.io.sockets.to(reqBody.teamId).emit('showError', winnerList);
+            }
+        }else{
+            global.io.sockets.to(reqBody.teamId).emit('showError', winnerList);
         }
+
+        return true;
 
     } catch (err) {
         console.log(err);
@@ -364,5 +397,6 @@ const quitGame = async (req, res) => {
 module.exports = {
     requestToPlay,
     scheduleQuestion,
-    submitUserAnswer
+    submitUserAnswer,
+    quitGame
 }

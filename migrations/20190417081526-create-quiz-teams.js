@@ -20,7 +20,7 @@ module.exports = {
         allowNull: false
       },
       player_status:{
-        type: Sequelize.ENUM('ACTIVE','INACTIVE'),
+        type: Sequelize.ENUM('ACTIVE','INACTIVE','TERMINATED'),
         allowNull: false,
         defaultValue: 'ACTIVE'
       },

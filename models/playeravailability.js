@@ -119,7 +119,7 @@ module.exports = (sequelize, DataTypes) => {
           }
         }).then(updateCount => {
           if (updateCount[0] != playerIds.length)
-            throw new CustomError("All players are not updated to busy");
+            throw new CustomError("All players are not updated to busy", 15);
           resolve(updateCount);
         }).catch(err => {
           console.log(err);

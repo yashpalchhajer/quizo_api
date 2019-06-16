@@ -5,6 +5,7 @@ const Player = require('../models').qa_players;
 const Validator = require('validatorjs');
 const QuizTeam = require('../models').qa_quiz_teams;
 const DateHelpers = require('../libraries/DateHandlers');
+const QuizConfigs = require('../models').qa_quiz_configs;
 
 const quizList = async (req, res) => {
 
@@ -61,10 +62,10 @@ const getPlayerDashboard = async (req, res) => {
      *  *anything else if required
      */
 
-    let reqBody = req.body;
+    let reqBody = req.query;
 
     const rules = {
-        'contact_number': 'required|min:10|mix:10'
+        'contact_number': 'required|min:10|max:10'
     };
 
     const validator = new Validator(reqBody, rules);
@@ -80,27 +81,26 @@ const getPlayerDashboard = async (req, res) => {
 
     let teamData = {};
     let responseArr = {
+        error: false,
+        status: 'SUCCESS',
         isPlaying: false,
         playerInfo: {
             id: playerData.id,
-            name: player.name,
+            name: playerData.name,
             email: playerData.email,
             gender: playerData.gender,
             profile_img_url: playerData.profile_img_url
         },
 
     };
-
     /** check Player is currently runnning or not */
     let prevEntry = await QuizTeam.getPlayerEntry(playerData.id);
     if (prevEntry && prevEntry.length > 0) {
-        /* const QuizData = await QuizConfigs.checkExistance(prevEntry[0].quiz_id);
+        const QuizData = await QuizConfigs.checkExistance(prevEntry[0].quiz_id);
         if(!QuizData){
-            console.log('Error in getting quiz config!');
-            return false;
+            return res.status(401).json({ error: true, status: 'FAILED', message: "Error in getting quiz config data" });
         }
-            Temp Remove
-        */
+        
         let lastMinute = await DateHelpers.addMinutes(prevEntry[0].createdAt, QuizData.quiz_duration);
         // CORRECT lastMinute value and then further
         if (lastMinute > Date.now()) {

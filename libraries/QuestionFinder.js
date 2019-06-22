@@ -149,6 +149,7 @@ const findQuestion = async (req) => {
         response.message = "Success";
         response.code = 0;
         response.status = true;
+        response.interval = quizDetails.question_interval;
         return response;
     } catch (error) {
         if (error instanceof CustomError) {
@@ -204,13 +205,8 @@ const findWinner = async (req) => {
         let totalQuestionInQuiz = quizDetails.no_of_questions;
         let restQuestionsToPush = totalQuestionInQuiz - totalQuestionsPushedToTeam;
         let winner = true;
-        console.log("minAnswerTime ", minAnswerTime);
         quizPlayerIds.forEach(player => {
             let playerAnswerTime = playersAnswerTime.get(player.player_id);
-            console.log("playerAnswerTime ", playerAnswerTime);
-            console.log("maxScore ", maxScore);
-            console.log("player.player_id ", player.player_id);
-            console.log("player.final_score ", player.final_score);
             if (restQuestionsToPush == 0 && player.questions != null) {
                 if (totalQuestionInQuiz != player.questions.length) {
                     let questionsDifference = totalQuestionInQuiz - player.questions.length;
@@ -228,8 +224,7 @@ const findWinner = async (req) => {
                 return false;
             }
         });
-        console.log("playerAnswerTime", playersAnswerTime);
-        console.log("winnerPlayerId ", winnerPlayerId);
+        
         if (winner) {
             response.code = 2;
             response.data = quizPlayerIds;
@@ -241,13 +236,11 @@ const findWinner = async (req) => {
             response.code = 0;
             response.status = false;
         }
-        console.log("time after start checking winner -: " + Date());
         return response;
     } catch (error) {
         if (error instanceof CustomError) {
             return { error: true, status: false, message: error.message, code: error.code };
         } else {
-            console.log(error);
             return { error: true, status: false, message: "Error in finding winner " + error.message, code: 1000 };
         }
     }

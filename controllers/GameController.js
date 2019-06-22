@@ -175,11 +175,9 @@ const scheduleQuestion = async (request) => {
         'teamId': request.teamId
     };
     await sendQuestion(questReq);
+    
 
-    global.schedulledJobs[request.teamId] = setQueInterval(questReq, request.quizInfo.question_interval);
-
-    console.log('job schedulled schedullar');
-    console.log(global.schedulledJobs);
+    return true;
 }
 
 
@@ -201,6 +199,7 @@ const sendQuestion = async (quesReq) => {
         if (question.code == 0) {
             clearInterval(global.schedulledJobs[quesReq.teamId]);
             global.io.sockets.to(quesReq.teamId).emit('fireQuest', question);
+            global.schedulledJobs[quesReq.teamId] = setQueInterval(quesReq, question.interval);
         } else if (question.code == 1 || question.code == 2) {
             // draw code 1
             // winner code 2
@@ -282,7 +281,6 @@ const submitUserAnswer = async (req, res) => {
             error: false,
             status: 'SUCCESS'
         };
-
         if (submitResp.hasOwnProperty('error') && submitResp.error == false) {
             if (submitResp.status == true) {
                 /** Fire Event for Answer submit */
@@ -295,13 +293,11 @@ const submitUserAnswer = async (req, res) => {
                 global.io.sockets.in(reqBody.teamId).emit('notifyTeam', responseData);
 
                 if (submitResp.data.nextQuestion == true) {
-                    clearInterval(global.schedulledJobs[reqBody.teamId]);
+                    
                     let questReq = {
                         'teamId': reqBody.teamId
                     };
-                    console.log('New Question Fired');
                     sendQuestion(questReq);
-                    global.schedulledJobs[reqBody.teamId] = setQueInterval(questReq, submitResp.data.questionInterval);
                 }
 
             } else if (submitResp.status == false) {

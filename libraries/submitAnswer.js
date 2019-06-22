@@ -11,7 +11,6 @@ const submitAnswer = async (req) => {
         // {
         //     playerId, teamId, questionId, answer[A,B,C,D], questionPushTime
         // }
-        console.log("time before submitting answer -: " + Date());
         // fetch question
         let question = await questionMaster.getQuestion(req.questionId);
         // if not exist  error
@@ -31,7 +30,7 @@ const submitAnswer = async (req) => {
 
         let nextQuestion = true;
         // start loop
-        console.log("quiz players");
+   
         quizPlayers.forEach(player => {
             // check is player submitted this question's answer
             let oldQuestion = false;
@@ -68,9 +67,7 @@ const submitAnswer = async (req) => {
                 totalQuestionsPushedToTeam = player.pushed_questions;
             if(nextQuestion)
                 nextQuestion = oldQuestion;
-            console.log("player ",player);
-            console.log("oldQuestion ",oldQuestion);
-            console.log("nextQuestion ",nextQuestion);
+         
         });
         // end loop
         let responseData = {
@@ -81,8 +78,6 @@ const submitAnswer = async (req) => {
         }
         if((quizDetails.no_of_questions - totalQuestionsPushedToTeam) == 0)
             responseData.nextQuestion = false;
-        console.log("submit_answer ", responseData);
-        console.log("time after submitting answer -: " + Date());
         return { error: false, status: true, message: 'Success', data: responseData , code: 0 };
     } catch (error) {
         if (error instanceof CustomError) {

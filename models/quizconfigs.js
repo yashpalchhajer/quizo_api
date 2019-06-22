@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {});
   QuizConfigs.associate = function (models) {
-    // console.log(models);
+ 
     // QuizConfigs.belongsTo(models.qa_quiz_catetories, {
     //   through: 'categories',
     //   as: 'quiz',

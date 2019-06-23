@@ -4,25 +4,26 @@ const playerAvailability = require('../models').qa_players_availables;
 const quizConfigs = require('../models').qa_quiz_configs;
 const quizTeam = require('../models').qa_quiz_teams;
 const CustomError = require('./customError');
+const messages = require('../config/ErrorCode');
 
 const TeamBuilder = async (req) => {
     try {
 
         const quizDetails = req.quizConfig;
         if(!quizDetails)
-            throw new CustomError("Invalid quiz", 11);
+            throw new CustomError(messages.INVALID_QUIZ_MESSAGE, messages.INVALID_QUIZ_CODE);
         if ("ACTIVE" == quizDetails.status) {
             await playerAvailability.registerPlayerRequest(req.playerId, quizDetails.id,req.connectionId);
             let availablePlayersList = await playerAvailability.fetchFreePlayersQuizWise(quizDetails.id);
             if (availablePlayersList.count == 0){
-                throw new CustomError("No other player exist for requested quiz", 12);
+                throw new CustomError(messages.NO_OTHER_PLAYER_EXIST_FOR_REQUESTED_QUIZ_MESSAGE, messages.NO_OTHER_PLAYER_EXIST_FOR_REQUESTED_QUIZ_CODE);
             }
             if (availablePlayersList.count < quizDetails.min_members){
                 if(quizDetails.min_members == 2  && req.state == 2){
                     await playerAvailability.registerPlayerRequest(0, quizDetails.id,'system');
                     availablePlayersList = await playerAvailability.fetchFreePlayersQuizWise(quizDetails.id);
                 }else{
-                    throw new CustomError("No minimum members", 13);
+                    throw new CustomError(messages.NO_MINIMUM_PLAYER_MESSAGE, messages.NO_MINIMUM_PLAYER_CODE);
                 }
             }
             
@@ -51,10 +52,10 @@ const TeamBuilder = async (req) => {
                 players: responsePlayerData,
                 playerIds: updatePlayer
             }
-            return { error: false, status: true, message: "Team successfully generated", data: responseData, code: 0};
+            return { error: false, status: true, message: messages.SUCCESS_MESSAGE, data: responseData, code: messages.SUCCESS_CODE};
         
         } else {
-            throw new CustomError("Quiz not active", 14);
+            throw new CustomError(messages.QUIZ_NOT_ACTIVE_MESSAGE, messages.QUIZ_NOT_ACTIVE_CODE);
         }
     } catch (error) {
         if (error instanceof CustomError) {

@@ -5,6 +5,8 @@ const quizTeam = require('../models').qa_quiz_teams;
 const questionMaster = require('../models').qa_question_masters;
 const playerQuestions = require("../models").qa_player_questions;
 const quizConfigs = require('../models').qa_quiz_configs;
+const messages = require('../config/ErrorCode');
+
 const findQuestion = async (req) => {
     try {
         const teamId = req.teamId;
@@ -12,9 +14,9 @@ const findQuestion = async (req) => {
         // have to check only active team players and get only active players
         let quizPlayerIds = await quizTeam.getTeamActivePlayersList(teamId);
         if (!quizPlayerIds)
-            throw new CustomError("No player found as per team");
+            throw new CustomError(messages.NO_PLAYER_FOUND_AS_PER_TEAM_MESSAGE, messages.NO_PLAYER_FOUND_AS_PER_TEAM_CODE);
         //let response = { error: false, status: false, message: 'Winner', code: 0 };
-        let response = { error: false, status: false, message: 'Success', code: 0 };
+        let response = { error: false, status: false, message: messages.SUCCESS_MESSAGE, code: messages.SUCCESS_CODE };
         //winner work
         // console.log("time before selecting winner -: " + Date());
         // if (quizPlayerIds.length == 1)
@@ -88,13 +90,13 @@ const findQuestion = async (req) => {
         // }
 
         if (restQuestionsToPush == 0) {
-            throw new CustomError('All questions done', 4);
+            throw new CustomError(messages.ALL_QUESTION_DONE_MESSAGE, messages.ALL_QUESTION_DONE_CODE);
         }
 
         let playerOldQuestions = await playerQuestions.fetchPlayersQuestions(playerIds, quizId);
         const questions = await questionMaster.fetchQuizWiseQuestions(quizId);
         if (questions.length == 0)
-            throw new CustomError("No questions available for quiz", 5);
+            throw new CustomError(messages.NO_QUESTION_AVAILABLE_FOR_QUIZ_MESSAGE, messages.NO_QUESTION_AVAILABLE_FOR_QUIZ_CODE);
         let finalQuestion;
         if (playerOldQuestions.length == 0) {
             finalQuestion = questions[0];
@@ -114,7 +116,7 @@ const findQuestion = async (req) => {
             oldQuestions = [...new Set(oldQuestions)];
             let filteredQuestions = questions.filter(question => !oldQuestions.includes(question.id));
             if (filteredQuestions.length == 0)
-                throw new CustomError("No more unique question", 6);
+                throw new CustomError(messages.NO_MORE_UNIQUE_QUESTION_MESSAGE, message.NO_MORE_UNIQUE_QUESTION_CODE);
             finalQuestion = filteredQuestions[0];
             if (playerOldQuestions.length != quizPlayerIds.length) {
                 let playerMap = new Map();
@@ -146,8 +148,8 @@ const findQuestion = async (req) => {
         console.log("time after selecting unique question -: " + Date());
         finalQuestion.questionPushTime = new Date().getTime();
         response.data = finalQuestion;
-        response.message = "Success";
-        response.code = 0;
+        response.message = messages.SUCCESS_MESSAGE;
+        response.code = messages.SUCCESS_CODE;
         response.status = true;
         response.interval = quizDetails.question_interval;
         return response;
@@ -169,8 +171,8 @@ const findWinner = async (req) => {
         // have to check only active team players and get only active players
         let quizPlayerIds = await quizTeam.getTeamActivePlayersList(teamId);
         if (!quizPlayerIds)
-            throw new CustomError("No player found as per team");
-        let response = { error: false, status: true, message: 'Winner', code: 2 };
+            throw new CustomError(messages.NO_PLAYER_FOUND_AS_PER_TEAM_MESSAGE, messages.NO_PLAYER_FOUND_AS_PER_TEAM_CODE);
+        let response = { error: false, status: true, message: messages.WINNER_MESSAGE, code: messages.WINNER_CODE };
         //winner work
         if (quizPlayerIds.length == 1) { 
             response.data = quizPlayerIds[0];
@@ -215,8 +217,8 @@ const findWinner = async (req) => {
                 }
             }
             if ((winnerPlayerId != player.player_id) && (player.final_score == maxScore) && (restQuestionsToPush == 0) && (playerAnswerTime == minAnswerTime)) {
-                response.message = "Draw";
-                response.code = 1;
+                response.message = messages.DRAW_MESSAGE;
+                response.code = messages.DRAW_CODE;
                 response.data = quizPlayerIds;
                 return response;
             } else if ((winnerPlayerId != player.player_id) && (restQuestionsToPush != 0) && (player.final_score + restQuestionsToPush) >= maxScore) {
@@ -225,15 +227,17 @@ const findWinner = async (req) => {
             }
         });
         
-        if (winner) {
-            response.code = 2;
+        if(response.code == 1) {
+            return response;
+        } else if (winner) {
+            response.code = messages.WINNER_CODE;
             response.data = quizPlayerIds;
             response.winnerId = winnerPlayerId;
             //console.log(response);
             //return response;
         } else {
-            response.message = "No winner found yet";
-            response.code = 0;
+            response.message = messages.NO_WINNER_YET_MESSAGE;
+            response.code = messages.NO_WINNER_YET_CODE;
             response.status = false;
         }
         return response;

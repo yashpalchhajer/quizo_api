@@ -66,7 +66,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
   };
 
-  QuizConfigs.checkExistance = (quizId) => {
+  QuizConfigs.checkExistance = (quizId, transaction) => {
     return new Promise((resolve, reject) => {
       QuizConfigs.findOne(
         {
@@ -74,7 +74,8 @@ module.exports = (sequelize, DataTypes) => {
           where: {
             id: quizId,
             status: 'ACTIVE'
-          }
+          },
+          transaction: transaction
         }
       ).then(quizData => {
         resolve(quizData);

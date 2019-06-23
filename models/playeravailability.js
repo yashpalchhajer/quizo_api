@@ -2,6 +2,7 @@
 const { TABLE_PLAYER_AVAILABLE } = require('../config/dbConstant');
 const CustomError = require('../libraries/customError');
 const Sequelize = require('sequelize');
+const messages = require('../config/ErrorCode');
 
 module.exports = (sequelize, DataTypes) => {
   const PlayerAvailable = sequelize.define(TABLE_PLAYER_AVAILABLE, {
@@ -119,7 +120,7 @@ module.exports = (sequelize, DataTypes) => {
           }
         }).then(updateCount => {
           if (updateCount[0] != playerIds.length)
-            throw new CustomError("All players are not updated to busy", 15);
+            throw new CustomError(messages.PLAYERS_NOT_UPDATED_TO_BUSY_MESSAGE, messages.PLAYERS_NOT_UPDATED_TO_BUSY_CODE);
           resolve(updateCount);
         }).catch(err => {
           console.log(err);

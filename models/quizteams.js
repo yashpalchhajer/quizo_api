@@ -80,13 +80,14 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
-  QuizTeams.getTeamActivePlayersList = (teamId) => {
+  QuizTeams.getTeamActivePlayersList = (teamId, transaction) => {
     return new Promise((resolve, reject) => {
       QuizTeams.findAll({
         where: {
           team_id: teamId,
           player_status: 'ACTIVE'
-        }
+        },
+        transaction: transaction
       })
         .then((playersList) => resolve(playersList))
         .catch(err => reject(err));
@@ -158,16 +159,34 @@ module.exports = (sequelize, DataTypes) => {
       QuizTeams.update(
         {
           status: 'TERMINATED'
-        },{
-          where:{
+        }, {
+          where: {
             team_id: teamId,
             status: 'ACTIVE'
           }
         }
-      ).then( (data) => {
+      ).then((data) => {
         resolve(data);
       }).catch(err => reject(err));
-   });
+    });
+  }
+
+  QuizTeams.updateQuizPlayerScoreAndQuestions = (score, questions, teamId, playerId, transaction) => {
+    return new Promise((resolve, reject) => {
+      QuizTeams.update({
+        final_score: score,
+        questions: questions
+      }, {
+          where: {
+            team_id: teamId,
+            player_id: playerId
+          },
+          transaction: transaction
+        }
+      ).then(data => {
+        resolve(data);
+      }).catch(err => reject(err));
+    });
   }
 
   return QuizTeams;

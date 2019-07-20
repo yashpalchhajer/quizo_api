@@ -1,7 +1,7 @@
 -- Config Seeder --
 
 
-INSERT INTO `qa_merchant_masters` (`id`, `name`, `password`, `email`, `contact_number`, `api_key`, `status`, `createdAt`, `updatedAt`) VALUES (NULL, 'Quizo', '12345678', 'yashpalchhajer@gmail.com', '9509807418', '44d4a56s4d564asd46a4sd4as6d4a64sd64sa64d6sa46d5', 'ACTIVE', CURRENT_TIMESTAMP, '2019-05-10 08:20:27');
+INSERT INTO `qa_merchant_masters` (`id`, `name`, `password`, `email`, `contact_number`, `api_key`, `status`, `createdAt`, `updatedAt`) VALUES (NULL, 'Quizo', '12345678', 'yashpalchhajer@gmail.com', '9509807418', '44d4a56s4d564asd46a4sd4as6d4a64sd64sa64d6sa46d5', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO `qa_quiz_categories` (`id`, `name`, `status`, `createdAt`, `updatedAt`) VALUES (NULL, 'Gen', 'ACTIVE', CURRENT_TIMESTAMP, NULL);
 
@@ -27,7 +27,6 @@ ALTER TABLE `qa_quiz_configs` CHANGE `updatedAt` `updatedAt` DATETIME on update 
 
 ALTER TABLE `qa_player_questions` CHANGE `updatedAt` `updatedAt` DATETIME on update CURRENT_TIMESTAMP NULL;
 
-ALTER TABLE `qa_question_masters` DROP FOREIGN KEY `quiz-category`; 
 ALTER TABLE `qa_question_masters` ADD CONSTRAINT `quiz-id` FOREIGN KEY (`quiz_id`) REFERENCES `qa_quiz_configs`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- to change Quiz Config table add new coloms

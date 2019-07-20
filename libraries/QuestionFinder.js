@@ -116,7 +116,7 @@ const findQuestion = async (req) => {
             oldQuestions = [...new Set(oldQuestions)];
             let filteredQuestions = questions.filter(question => !oldQuestions.includes(question.id));
             if (filteredQuestions.length == 0)
-                throw new CustomError(messages.NO_MORE_UNIQUE_QUESTION_MESSAGE, message.NO_MORE_UNIQUE_QUESTION_CODE);
+                throw new CustomError(messages.NO_MORE_UNIQUE_QUESTION_MESSAGE, messages.NO_MORE_UNIQUE_QUESTION_CODE);
             finalQuestion = filteredQuestions[0];
             if (playerOldQuestions.length != quizPlayerIds.length) {
                 let playerMap = new Map();
@@ -152,6 +152,7 @@ const findQuestion = async (req) => {
         response.code = messages.SUCCESS_CODE;
         response.status = true;
         response.interval = quizDetails.question_interval;
+        response.playerIds = playerIds;
         return response;
     } catch (error) {
         if (error instanceof CustomError) {
@@ -227,7 +228,7 @@ const findWinner = async (req) => {
             }
         });
         
-        if(response.code == 1) {
+        if(response.code == messages.DRAW_CODE) {
             return response;
         } else if (winner) {
             response.code = messages.WINNER_CODE;

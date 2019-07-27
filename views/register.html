@@ -12,6 +12,12 @@
 </head>
 
 <body>
+    <input type="hidden" id="id" value="1">
+    <input type="hidden" id="pass" value="123456">
+    <div id="cookieConsent">
+        <div class="cookieConsentText"><span>This is only for testing purpose. </span></div>
+    </div>
+
     <section id="registerDiv">
         <div class="form_wrapper">
             <div class="form_container">
@@ -53,7 +59,7 @@
     </section>
 
     <section id="quizDiv">
-        
+
     </section>
 
 
@@ -67,7 +73,7 @@
     <script src="/javascripts/register.js"></script>
     <script>
         window.localStorage = '';
-        window.localStorage.deviceToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjaGFudElkIjoxLCJpYXQiOjE1NjQyMzYxNzgsImV4cCI6MTU2NDMyMjU3OH0.5QhA1yOB-ITtkgwMjtYuRPOrKO8o9OydpAyfuEaRxVA';
+        window.localStorage.deviceToken = '';//'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjaGFudElkIjoxLCJpYXQiOjE1NjQyMzYxNzgsImV4cCI6MTU2NDMyMjU3OH0.5QhA1yOB-ITtkgwMjtYuRPOrKO8o9OydpAyfuEaRxVA';
         window.localStorage.merchantId = 1;
         window.localStorage.baseUrl = `${window.location.origin}/`;
         window.localStorage.accessToken = '';
@@ -77,7 +83,40 @@
         var mobileNumber = document.getElementById('mobile');
         var playerName = document.getElementById('playerName');
         var playerEmail = document.getElementById('playerEmail');
-     
+
+        getToken();
+
+        function getToken() {
+            let url = `${window.localStorage.baseUrl}getToken`;
+            let req = {
+                'id': $('#id').val(),
+                'password': $('#pass').val()
+            };
+            axios.post(url, req, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    }
+                }
+            ).then((res) => {
+                let response = res.data;
+                console.log(response);
+                if (response.error == false && response.status == 'SUCCESS') {
+                    if (response.data.hasOwnProperty('token')) {
+                        window.localStorage.deviceToken = response.data.token;
+                    }
+                } else if (response.hasOwnProperty('message')) {
+                    showError(response.message);
+                } else {
+                    showError('Some error occured');
+                }
+                return true;
+            }).catch((err) => {
+                console.error(err.response.data.message);
+                showError(err.response.data.message);
+            });
+        }
+
         function submitValidate() {
             let mobile = mobileNumber.value;
             let name = playerName.value;
@@ -165,7 +204,7 @@
             ).then((res) => {
                 let response = res.data.responseArr;
                 if (response.error == false && response.status == 'SUCCESS') {
-                    if (response.data.hasOwnProperty('accessToken')){
+                    if (response.data.hasOwnProperty('accessToken')) {
                         window.localStorage.accessToken = response.data.accessToken;
                         window.localStorage.playerData = JSON.stringify(response.data.player);
                         window.location.href = '/quiz';

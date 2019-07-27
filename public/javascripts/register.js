@@ -126,6 +126,6 @@ function showError(err) {
     x.className = "show";
     x.style.backgroundColor = '#ce2b2b';
 
-    setTimeout(function () { x.className = x.className.replace("show", ""); }, 1500);
+    setTimeout(function () { x.className = x.className.replace("show", ""); }, 150000);
 }
 

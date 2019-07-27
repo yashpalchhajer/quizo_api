@@ -519,3 +519,37 @@ body {
       padding-bottom: 20px;
   }
 }
+
+/* Cookie Consent Begin*/
+#cookieConsent {
+    background-color: rgba(20,20,20,0.5);
+    min-height: 26px;
+    font-size: 14px;
+    color: #ccc;
+    line-height: 26px;
+    padding: 8px 0 8px 15px;
+    /* font-family: "Times New Roman"; */
+    position: fixed;
+    top: 1%;
+    text-align: center;
+    left: 5%;
+    right: 5%;
+    display: block;
+    z-index: 9999;
+}
+
+
+.cookieConsentText span{
+  font-size: 25px;
+  font-family: cursive;
+  color: white;
+  animation: cookieConsentAnimation 3s linear infinite;
+}
+@keyframes cookieConsentAnimation{
+0%{opacity: 0;}
+50%{opacity: .5;}
+100%{opacity: 1;}
+}
+
+/*Cookie Consent End*/
+

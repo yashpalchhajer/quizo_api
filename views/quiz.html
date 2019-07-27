@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Quizo</title>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -798,7 +798,8 @@ p#myScore{
         // prevButton.addEventListener("click", previousQuestion);
         nextButton.addEventListener("click", nextQuestion);
         // scoreButton.addEventListener("click", showScore);
-
+        scoreButton.classList.add('hide');
+        scoreButton.classList.remove('show');
         //shows welcome message and startbutton
         quizContainer.classList.remove("hide");
         // three parts of quizContainer:
@@ -808,7 +809,7 @@ p#myScore{
         progressBar.classList.add("hide");
         progressBar.setAttribute("aria-valuemax", quizLength);
 
-        message.innerHTML = "Hey..! " + playerData.name + " welcome to quiz! <br />Would you like to start?";
+        message.innerHTML = "Hey..! " + playerData.name + " welcome to quizo! <br />Would you like to start?";
         startButton.setAttribute("style", "display:visible");
 
         function startQuiz() {

@@ -100,7 +100,6 @@
                 }
             ).then((res) => {
                 let response = res.data;
-                console.log(response);
                 if (response.error == false && response.status == 'SUCCESS') {
                     if (response.data.hasOwnProperty('token')) {
                         window.localStorage.deviceToken = response.data.token;

@@ -12,6 +12,11 @@ const TABLE_QUIZ_TEAM = PREFIX+'quiz_teams';
 const TABLE_QUESTION_MASTER = PREFIX+'question_masters';
 const TABLE_PLAYER_QUESTIOS = PREFIX+'player_questions';
 
+const TABLE_API_PROVIDERS = PREFIX+'api_providers';
+const TABLE_PAYMENT_MASTERS = PREFIX+'payment_masters';
+const TABLE_WALLET_MASTERS = PREFIX+'wallet_masters';
+const TABLE_WALLETS = PREFIX+'wallets';
+
 module.exports = {
     TABLE_MERCHANT_MASTER,
     TABLE_PLAYERS,
@@ -21,5 +26,9 @@ module.exports = {
     TABLE_PLAYER_AVAILABLE,
     TABLE_QUIZ_TEAM,
     TABLE_QUESTION_MASTER,
-    TABLE_PLAYER_QUESTIOS
+    TABLE_PLAYER_QUESTIOS,
+    TABLE_API_PROVIDERS,
+    TABLE_PAYMENT_MASTERS,
+    TABLE_WALLET_MASTERS,
+    TABLE_WALLETS
 }

@@ -16,10 +16,13 @@ var mongoDb = require('./mongoose/index').connectionObj;
 
 var app = express();
 
+app.use(express.static('public'))
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 // app.use(cors);
+app.set('views', './views');
 
 app.use(cors({
     origin: '*',

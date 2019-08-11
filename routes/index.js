@@ -12,8 +12,17 @@ const PlansController = require('../controllers').PlansController;
 const WalletController = require('../controllers').WalletController;
 
 /* GET home page. */
+
+const path = require('path');
+
 router.get('/', function (req, res) {
-  res.render('index', { title: 'Express' });
+  res.sendFile(path.join(__dirname + '/../views/register.html'));
+  // res.render('index', { title: 'Express' });
+});
+
+router.get('/quiz', function (req, res) {
+  res.sendFile(path.join(__dirname + '/../views/quiz.html'));
+  // res.render('index', { title: 'Express' });
 });
 
 router.post('/getToken', MerchanController.getDeviceToken);

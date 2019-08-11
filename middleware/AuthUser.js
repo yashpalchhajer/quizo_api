@@ -20,7 +20,9 @@ const AuthUser = async (req,res,next) => {
         if(!verifyDevice){
             return res.status(400).json({error:true,status:"FAILED",message: "Failed to verify device token"});
         }
-
+        if(req.method == 'GET'){
+            req.body = req.query;
+        }
         req.body['merchant_id'] = verifyDevice;
 
         const accessToken = req.headers['x-access-token'];
@@ -38,7 +40,9 @@ const AuthUser = async (req,res,next) => {
             return res.status(400).json({error:true,status:"FAILED",message: "Invalid access token or player id!"});
         }
 
-        req.body['player_id'] = verifyAcess;
+        req.body['player_id'] = verifyAcess.id;
+        req.player = verifyAcess;
+
         next();
 
     }catch(err){

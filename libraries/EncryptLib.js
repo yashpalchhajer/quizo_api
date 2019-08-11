@@ -56,7 +56,7 @@ const VerifyAccessToken = (token,contact_number) => {
                 if(err){
                     reject(err);
                 }
-                resolve(player.id);
+                resolve(player);
             });
         }).catch(error => {
             reject(error);

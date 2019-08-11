@@ -4,6 +4,8 @@ const Player = require('../models').qa_players;
 const Validator = require('validatorjs');
 const OTPToken = require('../models').qa_otp_tokens;
 const EncryptLib = require('../libraries/EncryptLib');
+const Wallets = require('../models').qa_wallets;
+
 /**
  * 
  * @param {*} req 
@@ -46,6 +48,10 @@ const register = async (req, res) => {
         if (process.env.NODE_ENV != 'production') {
             respMessage = respMessage + " [" + otp + "]";
         }
+        
+        // if(!isRegistered){
+            await Wallets.createWallet(playerData);
+        // }
 
         let responseArr = {
             "error": false,
@@ -61,6 +67,7 @@ const register = async (req, res) => {
         /** if user not exists then register and send otp */
 
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured during registration' });
     }
 }
@@ -90,32 +97,35 @@ const verifyAuthOtp = async (req, res) => {
         /**
          * OTP CHeck bypass
          */
-        if (process.env.OTP_VERIFY == true) {
+        if (process.env.OTP_VERIFY == 1) {
 
+            const otpData = await OTPToken.checkOTP(reqBody);
 
-	        const otpData = await OTPToken.checkOTP(reqBody);
+            if (!otpData) {
+                return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
+            }
 
-        	if (!otpData) {
-	            return res.status(401).json({ error: true, status: 'FAILED', message: "OTP you have entered wrong OTP" });
-        	}
+            otpData.update({ is_valid: false });
 
-	        otpData.update({ is_valid: false });
+            /** get date dfference 
+             * NEED TO ADD IN LIBRARY
+            */
+            const generateTime = otpData.createdAt;
+            const current = new Date();
+            const diffMs = (current - generateTime); // milliseconds between now & Christmas
+            const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
 
-        /** get date dfference 
-         * NEED TO ADD IN LIBRARY
-        */
-	        const generateTime = otpData.createdAt;
-	        const current = new Date();
-	        const diffMs = (current - generateTime); // milliseconds between now & Christmas
-	        const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
-
-	        if (diffMins > process.env.OTP_EXP_LIMIT) {
-	            return res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
-	        }
-	}
+            if (diffMins > process.env.OTP_EXP_LIMIT) {
+                return res.status(500).json({ error: true, status: 'FAILED', message: 'Your OTP has been expired!' });
+            }
+        }
         let accesToken = await EncryptLib.getAccessToken(playerData);
         playerData.update({ is_otp_verified: 'YES' });
 
+        /** can remove from here */
+        let walletDetails = await Wallets.getWalletDetails(playerData);
+        /** can remove from here */
+        
         let responseArr = {
             "error": false,
             "status": "SUCCESS",
@@ -127,12 +137,19 @@ const verifyAuthOtp = async (req, res) => {
                     "gender": playerData.gender,
                     "profile_img": playerData.profile_img_url,
                 },
+                "wallet":{
+                    "free_credits": walletDetails.dataValues.free_credits,
+                    "referrals": walletDetails.dataValues.referrals,
+                    "purchased": walletDetails.dataValues.purchased,
+                    "earned": walletDetails.dataValues.earned,
+                },
                 "accessToken": accesToken
             }
         };
 
         return res.status(200).json({ responseArr });
     } catch (err) {
+        console.log(err);
         return res.status(500).json({ error: true, status: 'FAILED', message: 'Error occured while verifying OTP' });
     }
 

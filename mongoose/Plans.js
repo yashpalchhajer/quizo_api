@@ -10,7 +10,7 @@ let plansSchema = new Schema({
     },
     description: String,
     indian_rupie: Number,
-    coin_per_rupee: Number,
+    coin_per_rupie: Number,
     plan_type: {
         type: String,
         enum: ['DEFAULT', 'CUSTOM']
@@ -36,7 +36,7 @@ const newPlan = async (request) => {
             name: request.name,
             description: request.description,
             indian_rupie: request.indian_rupie,
-            coin_per_rupee: request.coin_per_rupee,
+            coin_per_rupie: request.coin_per_rupee,
             plan_type: request.plan_type,
             status: 'ACTIVE'
         });
@@ -48,18 +48,26 @@ const newPlan = async (request) => {
 };
 
 const getPlan = async () => {
-    return new Promise((resolver,reject) => {
+    return new Promise((resolver, reject) => {
 
-        planSchema.find({status:'ACTIVE'},function (err, plans) {
+        planSchema.find({ status: 'ACTIVE' }, function (err, plans) {
             if (err) reject(err);
             resolver(plans);
-        }).select('name description indian_rupie coin_per_rupee plan_type');
+        }).select('name description indian_rupie coin_per_rupie plan_type');
     })
-    
 };
 
+const getPlanById = (id) => {
+    return new Promise((resolve,reject) => {
+        planSchema.find({_id: id,status:'ACTIVE' },function(err,plans){
+            if(err) resolve(false);
+            resolve(plans);
+        });
+    });
+}
 
 module.exports = {
     newPlan,
-    getPlan
+    getPlan,
+    getPlanById
 }

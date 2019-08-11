@@ -1,0 +1,73 @@
+
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
+let plansSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    description: String,
+    indian_rupie: Number,
+    coin_per_rupie: Number,
+    plan_type: {
+        type: String,
+        enum: ['DEFAULT', 'CUSTOM']
+    },
+    status: {
+        type: String,
+        enum: ['ACTIVE', 'INACTIVE', 'TERMINATED']
+    },
+    created_at: {
+        type: Date,
+        default: Date.now()
+    },
+    updated_at: Date
+});
+
+const planSchema = mongoose.model('Plans', plansSchema);
+
+
+
+const newPlan = async (request) => {
+    return new Promise((resolver, reject) => {
+        let newPlan = new planSchema({
+            name: request.name,
+            description: request.description,
+            indian_rupie: request.indian_rupie,
+            coin_per_rupie: request.coin_per_rupee,
+            plan_type: request.plan_type,
+            status: 'ACTIVE'
+        });
+        newPlan.save(function (err, newPlan) {
+            if (err) reject(err);
+            resolver('Plan added');
+        });
+    });
+};
+
+const getPlan = async () => {
+    return new Promise((resolver, reject) => {
+
+        planSchema.find({ status: 'ACTIVE' }, function (err, plans) {
+            if (err) reject(err);
+            resolver(plans);
+        }).select('name description indian_rupie coin_per_rupie plan_type');
+    })
+};
+
+const getPlanById = (id) => {
+    return new Promise((resolve,reject) => {
+        planSchema.find({_id: id,status:'ACTIVE' },function(err,plans){
+            if(err) resolve(false);
+            resolve(plans);
+        });
+    });
+}
+
+module.exports = {
+    newPlan,
+    getPlan,
+    getPlanById
+}

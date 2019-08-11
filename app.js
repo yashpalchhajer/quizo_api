@@ -10,12 +10,19 @@ require('dotenv').config();
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var cors = require('cors');
+
+var Plans = require('./mongoose/index').models.Plans;
+var mongoDb = require('./mongoose/index').connectionObj;
+
 var app = express();
+
+app.use(express.static('public'))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 // app.use(cors);
+app.set('views', './views');
 
 app.use(cors({
     origin: '*',

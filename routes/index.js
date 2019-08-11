@@ -9,8 +9,17 @@ const PlayerController = require('../controllers').PlayerController;
 const GameController = require('../controllers').GameController;
 const DashBoard = require('../controllers').DashBoardController;
 /* GET home page. */
+
+const path = require('path');
+
 router.get('/', function (req, res) {
-  res.render('index', { title: 'Express' });
+  res.sendFile(path.join(__dirname + '/../views/register.html'));
+  // res.render('index', { title: 'Express' });
+});
+
+router.get('/quiz', function (req, res) {
+  res.sendFile(path.join(__dirname + '/../views/quiz.html'));
+  // res.render('index', { title: 'Express' });
 });
 
 router.post('/getToken', MerchanController.getDeviceToken);

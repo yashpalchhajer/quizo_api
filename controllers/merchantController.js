@@ -14,7 +14,7 @@ const list = async (req, res, next) => {
         .then(merchant => {
             let responseArr = {
                 "error": false,
-                "status":"SUCCESS",
+                "status": "SUCCESS",
                 "data": merchant
             }
 
@@ -39,11 +39,11 @@ const getDeviceToken = async (req, res, next) => {
         }
 
         MerchantMaster.findOne({
-            where: { id: reqBody.id,status:'ACTIVE' }
+            where: { id: reqBody.id, status: 'ACTIVE' }
         })
             .then(merchant => {
 
-                if(!merchant){
+                if (!merchant) {
                     return res.status(500).json({ error: true, status: 'FAILED', message: 'Merchant is temporarily down, Please try after some time.' });
                 }
 
@@ -54,15 +54,15 @@ const getDeviceToken = async (req, res, next) => {
 
                     let responseArr = {
                         "error": false,
-                        "status":"SUCCESS",
-                        "data": {"token":token}
+                        "status": "SUCCESS",
+                        "data": { "token": token }
                     };
                     return res.status(200).json(responseArr);
                 } else {
                     return res.status(500).json({ error: true, status: 'FAILED', message: 'Incorrect ID or Password' });
                 }
             }).catch(error => {
-                return res.status(500).json({ error: true, status: 'FAILED', message: 'Some error occured while getting token. [001] '+ error });
+                return res.status(500).json({ error: true, status: 'FAILED', message: 'Some error occured while getting token. [001] ' + error });
             })
 
     } catch (error) {
@@ -70,7 +70,37 @@ const getDeviceToken = async (req, res, next) => {
     }
 }
 
+const getToken = (reqBody) => {
+    MerchantMaster.findOne({
+        where: { id: reqBody.id, status: 'ACTIVE' }
+    })
+    .then(merchant => {
+
+        if (!merchant) {
+            return [{ error: true, status: 'FAILED', message: 'Merchant is temporarily down, Please try after some time.' }];
+        }
+
+        if (merchant.password == reqBody.password) {
+            var token = jwt.sign({ merchantId: merchant.id }, merchant.api_key, {
+                expiresIn: 86400
+            });
+
+            let responseArr = {
+                "error": false,
+                "status": "SUCCESS",
+                "data": { "token": token }
+            };
+            return [responseArr];
+        } else {
+            return [{ error: true, status: 'FAILED', message: 'Incorrect ID or Password' }];
+        }
+    }).catch(error => {
+        return [{ error: true, status: 'FAILED', message: 'Some error occured while getting token. [001] ' + error }];
+    })
+}
+
 module.exports = {
     list,
-    getDeviceToken
+    getDeviceToken,
+    getToken
 }

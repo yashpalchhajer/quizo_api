@@ -7,9 +7,9 @@ const findQuestion = require('../libraries/QuestionFinder');
 const QuizTeam = require('../models').qa_quiz_teams;
 const QuizConfigs = require('../models').qa_quiz_configs;
 const DateHelpers = require('../libraries/DateHandlers');
-
+const ErrorCode = require('../config/ErrorCode');
 const SubmitAnswer = require('../libraries/submitAnswer');
-
+const Utilities = require('../libraries/Utilities');
 const requestToPlay = async (req) => {
     let reqBody = req;
 
@@ -175,7 +175,7 @@ const scheduleQuestion = async (request) => {
         'teamId': request.teamId
     };
     await sendQuestion(questReq);
-    
+
 
     return true;
 }
@@ -193,34 +193,39 @@ const sendQuestion = async (quesReq) => {
      *  if no question available then clearInterval
      *  if Winnner is then notify for Winner
      */
-
+    let playerIds = question.playerIds;
+    delete question.playerIds;
     if (question.hasOwnProperty('error') && question.error == false) {
         // also check multiple checks acc to response
-        if (question.code == 0) {
+        if (question.code == ErrorCode.SUCCESS_CODE) {
             clearInterval(global.schedulledJobs[quesReq.teamId]);
+            if (playerIds.includes(0)) {
+                autoSubmitAns(question, quesReq);
+            }
             global.io.sockets.to(quesReq.teamId).emit('fireQuest', question);
+
             global.schedulledJobs[quesReq.teamId] = setQueInterval(quesReq, question.interval);
-        } else if (question.code == 1 || question.code == 2) {
+        } else if (question.code == ErrorCode.WINNER_CODE || question.code == ErrorCode.DRAW_CODE) {
             // draw code 1
             // winner code 2
             global.io.sockets.to(quesReq.teamId).emit('showWinner', question);
             endGame(quesReq.teamId);
-        } else if (question.code == 6) {
+        } else if (question.code == ErrorCode.NO_MORE_UNIQUE_QUESTION_CODE) {
             // No more unique question
 
             global.io.sockets.to(quesReq.teamId).emit('showError', question);
 
             const getWinnner = await findQuestion.findWinner(quesReq);
 
-            if(getWinnner.hasOwnProperty('error') && getWinnner.error == false){
-                if(getWinnner.code == 0 || getWinnner.code == 1 || getWinnner.code == 2){
+            if (getWinnner.hasOwnProperty('error') && getWinnner.error == false) {
+                if (getWinnner.code == ErrorCode.SUCCESS_CODE || getWinnner.code == ErrorCode.WINNER_CODE || getWinnner.code == ErrorCode.DRAW_CODE) {
                     global.io.sockets.to(quesReq.teamId).emit('showWinner', getWinnner);
                     endGame(quesReq.teamId);
-                }else{
+                } else {
                     global.io.sockets.to(quesReq.teamId).emit('showError', getWinnner);
                     endGame(quesReq.teamId);
                 }
-            }else{
+            } else {
                 global.io.sockets.to(quesReq.teamId).emit('showError', getWinnner);
             }
 
@@ -235,6 +240,9 @@ const sendQuestion = async (quesReq) => {
         if (question.message != 'Success') {
             clearInterval(quesReq.teamId);
         }
+    } else {
+        global.io.sockets.to(quesReq.teamId).emit('showError', question);
+        endGame(quesReq.teamId);
     }
 }
 
@@ -293,7 +301,7 @@ const submitUserAnswer = async (req, res) => {
                 global.io.sockets.in(reqBody.teamId).emit('notifyTeam', responseData);
 
                 if (submitResp.data.nextQuestion == true) {
-                    
+
                     let questReq = {
                         'teamId': reqBody.teamId
                     };
@@ -372,14 +380,14 @@ const quitGame = async (req, res) => {
 
         const winnerList = await findQuestion.findWinner(req);
 
-        if(winnerList.hasOwnProperty('error') && winnerList.error == false){
-            if(winnerList.code == 1 || winnerList.code == 2){
+        if (winnerList.hasOwnProperty('error') && winnerList.error == false) {
+            if (winnerList.code == ErrorCode.WINNER_CODE || winnerList.code == ErrorCode.DRAW_CODE) {
                 global.io.sockets.to(reqBody.teamId).emit('showWinner', winnerList);
                 endGame(reqBody.teamId);
-            }else{
+            } else {
                 global.io.sockets.to(reqBody.teamId).emit('showError', winnerList);
             }
-        }else{
+        } else {
             global.io.sockets.to(reqBody.teamId).emit('showError', winnerList);
         }
 
@@ -388,6 +396,50 @@ const quitGame = async (req, res) => {
     } catch (err) {
         console.log(err);
     }
+}
+
+const autoSubmitAns = async (question, quesReq) => {
+    /* playerId, teamId, questionId, answer[A,B,C,D], questionPushTime */
+    let submitReq = {
+        playerId: 0,
+        teamId: quesReq.teamId,
+        questionId: question.data.id,
+        answer: await Utilities.randomOption(Object.keys(question.data.options)),
+        questionPushTime: question.data.questionPushTime
+    };
+    let ms = Utilities.getRandomSeconds(question.interval / 4, question.interval);
+    ms = Math.floor(ms) * 1000;
+    await Utilities.usleep(ms);
+    const submitResp = await SubmitAnswer(submitReq);
+    let responseData = {
+        error: false,
+        status: 'SUCCESS'
+    };
+    if (submitResp.hasOwnProperty('error') && submitResp.error == false) {
+        if (submitResp.status == true) {
+            /** Fire Event for Answer submit */
+            responseData.data = {
+                playerId: 0,
+                playerName: 'System',
+                isCorrect: submitResp.data.isCorrect
+            };
+            global.io.sockets.in(quesReq.teamId).emit('notifyTeam', responseData);
+
+            if (submitResp.data.nextQuestion == true) {
+                let questReq = {
+                    'teamId': quesReq.teamId
+                };
+                sendQuestion(questReq);
+            }
+
+        } else if (submitResp.status == false) {
+            // not submitted
+        }
+    } else {
+        // invalid resp
+    }
+    return true;
+
 }
 
 module.exports = {

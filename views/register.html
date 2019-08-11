@@ -13,7 +13,7 @@
 
 <body>
     <input type="hidden" id="id" value="1">
-    <input type="hidden" id="pass" value="123456">
+    <input type="hidden" id="pass" value="12345678">
     <div id="cookieConsent">
         <div class="cookieConsentText"><span>This is only for testing purpose. </span></div>
     </div>
@@ -100,7 +100,6 @@
                 }
             ).then((res) => {
                 let response = res.data;
-                console.log(response);
                 if (response.error == false && response.status == 'SUCCESS') {
                     if (response.data.hasOwnProperty('token')) {
                         window.localStorage.deviceToken = response.data.token;

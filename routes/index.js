@@ -8,6 +8,9 @@ const MerchanController = require('../controllers').MerchantController;
 const PlayerController = require('../controllers').PlayerController;
 const GameController = require('../controllers').GameController;
 const DashBoard = require('../controllers').DashBoardController;
+const PlansController = require('../controllers').PlansController;
+const WalletController = require('../controllers').WalletController;
+
 /* GET home page. */
 
 const path = require('path');
@@ -40,5 +43,12 @@ router.get('/getDashboardData', AuthUser, DashBoard.getPlayerDashboard);
 router.post('/submitAnswer', AuthUser, GameController.submitUserAnswer);
 // router.post('/requestToPlay',GamePlayer.requestToPlay);
 
+router.get('/getPlans', AuthUser, PlansController.getPlans);
+router.get('/getWallet', AuthUser, WalletController.getWallet);
+
+// router.post('/buyCoins',AuthUser, WalletController.buyCoins);
+router.post('/buyCoins',AuthUser, (req,res) => {
+  return res.status(200).json({error:false,message:'Under development'});
+});
 
 module.exports = router;

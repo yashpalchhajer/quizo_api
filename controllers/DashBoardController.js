@@ -76,7 +76,7 @@ const getPlayerDashboard = async (req, res) => {
 
     let playerData = await Player.checkPlayerExistance(reqBody.contact_number);
     if (!playerData) {
-        return res.status(401).json({ error: true, status: 'FAILED', message: "Player you ar looking for is not found" });
+        return res.status(401).json({ error: true, status: 'FAILED', message: "Player you are looking for is not found" });
     }
 
     let teamData = {};

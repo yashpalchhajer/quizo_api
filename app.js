@@ -10,6 +10,10 @@ require('dotenv').config();
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var cors = require('cors');
+
+var Plans = require('./mongoose/index').models.Plans;
+var mongoDb = require('./mongoose/index').connectionObj;
+
 var app = express();
 
 app.use(express.static('public'))

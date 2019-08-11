@@ -4,6 +4,15 @@ module.exports = {
     VALIDATION_ERROR_CODE: 400,
     VALIDATION_ERROR_MESSAGE: "Validation fail",
 
+    SERVER_ERROR_CODE: 500,
+    SERVER_ERROR_MESSAGE: "Some error occured on server.",
+
+    PLAYER_NOT_FOUND_CODE: 403,
+    PLAYER_NOT_FOUND_MESSAGE: 'No player found with this number',
+
+    RESOURCE_NOT_FOUND_CODE: 404,
+    RESOURCE_NOT_FOUND_MESSAGE: 'The resource you are looking for does not found.',
+
     SUCCESS_CODE: 0,
     SUCCESS_MESSAGE: "Success",
 

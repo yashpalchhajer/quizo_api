@@ -32,6 +32,10 @@ module.exports = {
         type: Sequelize.INTEGER(11),
         allowNull: false
       },
+      transaction_type: {
+        type: Sequelize.ENUM('ADD', 'REDEEM'),
+        allowNull: false
+      },
       status: {
         type: Sequelize.ENUM('INITIATED', 'HOLD', 'SUCCESS', 'FAILED', 'REFUND'),
         allowNull: false

@@ -5,6 +5,7 @@ const DashBoardController = require('./DashBoardController');
 const GameController = require('./GameController');
 const PlansController = require('./PlansController');
 const WalletController = require('./WalletController');
+const ProvidersController = require('./ProvidersController');
 
 module.exports = {
     MerchantController,
@@ -12,5 +13,6 @@ module.exports = {
     DashBoardController,
     GameController,
     PlansController,
-    WalletController
+    WalletController,
+    ProvidersController
 }

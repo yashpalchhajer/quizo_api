@@ -37,7 +37,7 @@ const getPlans = async (req, res) => {
 
         let reqBody = req.query;
         
-        if(!req.hasOwnProperty('player') && req.player != undefined ){
+        if(!req.hasOwnProperty('player') || req.player == undefined ){
             return res.status(ErrorCodes.PLAYER_NOT_FOUND_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.PLAYER_NOT_FOUND_MESSAGE });
         }
         

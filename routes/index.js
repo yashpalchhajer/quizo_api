@@ -10,6 +10,7 @@ const GameController = require('../controllers').GameController;
 const DashBoard = require('../controllers').DashBoardController;
 const PlansController = require('../controllers').PlansController;
 const WalletController = require('../controllers').WalletController;
+const ProvidersController = require('../controllers').ProvidersController;
 
 /* GET home page. */
 
@@ -45,10 +46,10 @@ router.post('/submitAnswer', AuthUser, GameController.submitUserAnswer);
 
 router.get('/getPlans', AuthUser, PlansController.getPlans);
 router.get('/getWallet', AuthUser, WalletController.getWallet);
-
-// router.post('/buyCoins',AuthUser, WalletController.buyCoins);
-router.post('/buyCoins',AuthUser, (req,res) => {
-  return res.status(200).json({error:false,message:'Under development'});
-});
+router.get('/getPaymentOptions', AuthUser, ProvidersController.getPaymentProviders);
+router.post('/buyCoins',AuthUser, WalletController.buyCoins);
+// router.post('/buyCoins', AuthUser, (req, res) => {
+//   return res.status(200).json({ error: false, message: 'Under development' });
+// });
 
 module.exports = router;

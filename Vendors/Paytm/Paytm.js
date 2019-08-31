@@ -5,7 +5,7 @@ const PaymentMaster = require('../../models').qa_payment_masters;
 const sequelize = require('../../models/index').sequelize;
 const PaytmUtility = require('./PaytmUtility');
 
-const walletDepositInitiate = async (request, provider) => {
+const walletDepositInitiate = async (request, provider,res) => {
     let transaction;
 
     try {
@@ -52,21 +52,13 @@ const walletDepositInitiate = async (request, provider) => {
 
 
 
-        let paytmCheckSum = await PaytmUtility.getInitCheckSum(initResp, request.player, provider.credentials);
+        let resp = PaytmUtility.getInitCheckSum(initResp, request.player, provider.credentials,res);
         // call paytm Utility to get checksum
-        const returnArr = {
-            "transaction_id": initResp.id, // to be sent to provider
-            "reference_number": initResp.transaction_number, // to be shown to user
-            "provider_reference": '',// to be sent to provider
-            "provider_credentials": JSON.parse(provider.credentials), // to be user for provider calling,
-            "provider_checksum_data": paytmCheckSum
-        };
-
-        // check initResp
-        return returnArr;
+        
+        return resp;
     } catch (err) {
         await transaction.rollback();
-        console.error(err);
+        console.error('Error in paytm ++++++++++++++ ',err);
         return err;
     }
 }
@@ -75,6 +67,8 @@ const walletUpdateStatus = async (request, provider) => {
 
     let transaction;
     try {
+        const reqBody = request.body;
+
         const confirmHash = await PaytmUtility.verifyHash();
 
         if (!confirmHash) {

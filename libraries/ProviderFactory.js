@@ -1,13 +1,13 @@
 
 const Paytm = require('../Vendors/Paytm/Paytm');
 
-const paymentInitiate = async (request, provider) => {
+const paymentInitiate = (request, provider,res) => {
 
     let paymentInitiateResp = '';
 
     switch (provider.id) {
         case 1:
-            paymentInitiateResp = await Paytm.walletDepositInitiate(request, provider);
+        Paytm.walletDepositInitiate(request, provider,res);
             break;
 
         case 2:
@@ -21,7 +21,7 @@ const paymentInitiate = async (request, provider) => {
 
     // check paymentInitiateResp
 
-    return paymentInitiateResp;
+    // return paymentInitiateResp;
 }
 
 const updatePaymentStatus = async (request, provider) => {

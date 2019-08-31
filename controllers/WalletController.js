@@ -92,25 +92,12 @@ const buyCoins = async (req, res) => {
         let initiateResp;
         /** initiate payment */
         reqBody['player'] = req.player;
-        initiateResp = await ProviderFactory.paymentInitiate(reqBody, providerDetails);
-
-        if (!initiateResp) {
-            throw new Error('Some error occured while initiate txn');
-        }
-
-        if (!initiateResp.hasOwnProperty('transaction_id') || !initiateResp.hasOwnProperty('provider_credentials')) {
-            throw new Error('error on initiate');
-        }
-        /** need to refactor  */
-
-        // check response from factory
-
-
-        return res.status(200).json(initiateResp);
-
+        // initiateResp = await ProviderFactory.paymentInitiate(reqBody, providerDetails,res);
+        await ProviderFactory.paymentInitiate(reqBody,providerDetails,res);
+        
 
     } catch (err) {
-        console.error(err);
+        console.error('Error in Wallet Controler ========= ',err);
         return res.status(ErrorCodes.SERVER_ERROR_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.err });
     }
 

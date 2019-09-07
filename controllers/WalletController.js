@@ -10,6 +10,7 @@ const Providers = require('../models').qa_api_providers;
 const ProviderFactory = require('../libraries/ProviderFactory');
 const PaymentMaster = require('../models').qa_payment_masters;
 const sequelize = require('../models/index').sequelize;
+const WalletMaster = require('../models').qa_wallet_masters;
 
 const getWallet = async (req, res) => {
     try {
@@ -93,42 +94,40 @@ const buyCoins = async (req, res) => {
         /** initiate payment */
         reqBody['player'] = req.player;
         // initiateResp = await ProviderFactory.paymentInitiate(reqBody, providerDetails,res);
-        await ProviderFactory.paymentInitiate(reqBody,providerDetails,res);
-        
+        await ProviderFactory.paymentInitiate(reqBody, providerDetails, res);
+
 
     } catch (err) {
-        console.error('Error in Wallet Controler ========= ',err);
+        console.error('Error in Wallet Controler ========= ', err);
         return res.status(ErrorCodes.SERVER_ERROR_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.err });
     }
 
 }
 
-const processPayment = async (req, res) => {
+const requeryTxn = async (req, res) => {
 
     try {
         let reqBody = req.body;
 
         const rules = {
-            "transaction_id": "required",
-            "player_id": "required",
-            "provider_id": "required",
-            "response": "required"
+            "order_id": "required|integer",
+            "contact_number": "required"
         };
 
         const validation = new Validator(reqBody, rules);
         if (validation.fails()) {
-            return res.status(ErrorCodes.VALIDATION_ERROR_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.VALIDATION_ERROR_MESSAGE, "validation": validator.errors });
+            return res.status(ErrorCodes.VALIDATION_ERROR_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.VALIDATION_ERROR_MESSAGE, "validation": Validator.errors });
         }
 
         const txnDetails = await PaymentMaster.findOne(
             {
                 where: {
-                    id: reqBody.transaction_id,
+                    id: reqBody.order_id,
                     status: "INITIATED",
                     transaction_type: "ADD",
-                    player_id: reqBody.player_id
-                },
-                raw: true
+                    player_id: req.player.id
+                }
+                
             }
         ).then((txnData) => {
             return txnData;
@@ -136,19 +135,16 @@ const processPayment = async (req, res) => {
             console.error(err);
             throw new Error(err);
         });
-
+    
         if (!txnDetails) {
-            return res.status(ErrorCodes.TXN_NOT_FOUND_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.TXN_NOT_FOUND_MESSAGE });
+            return res.status(200).json({ error: true, status: 'FAILED', message: ErrorCodes.TXN_NOT_FOUND_MESSAGE });
         }
 
-        if (txnDetails.DataValues.provider_id != reqBody.provider_id) {
-            return res.status(ErrorCodes.INVALID_PROVIDER_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.INVALID_PROVIDER_MESSAGE });
-        }
 
-        const providerDetails = await Providers.getProviderById(reqBody.provider_id);
+        const providerDetails = await Providers.getProviderById(txnDetails.provider_id);
 
         if (!providerDetails) {
-            return res.status(ErrorCodes.PROVIDER_NOT_FOUND_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.PROVIDER_NOT_FOUND_MESSAGE });
+            return res.status(200).json({ error: true, status: 'FAILED', message: ErrorCodes.PROVIDER_NOT_FOUND_MESSAGE });
         }
 
         const requery = await doRequery(req.player, txnDetails, providerDetails);
@@ -177,21 +173,20 @@ const doRequery = async (player, txnDetails, provider) => {
             }
         }
 
-        if (!updateResp.hasOwnProperty('status') || updateResp.status == undefined) {
+        if (!updateResp.data.hasOwnProperty('status') || updateResp.data.status == undefined) {
             return json({ error: true, status: 'FAILED', message: 'Invalid response received from provider, Please check after some time.' });
         }
 
-        if (updateResp.status == 'SUCCESS') {
+        if (updateResp.data.status == 'SUCCESS') {
             // update wallet master
 
             /** get plan details to coins */
-            const Plan = Plans.getPlanById(txnDetails.plan_id);
-
+            let Plan = await Plans.getPlanById(txnDetails.plan_id);
             if (!Plan) {
                 throw new Error("Invalid plan details");
             }
             let coinsToAdd = 0;
-
+            Plan = Plan[0];
             if (Plan.plan_type == 'DEFAULT') {
                 coinsToAdd = Number(Plan.coin_per_rupie) * Number(txnDetails.amount);
             } else {
@@ -199,7 +194,6 @@ const doRequery = async (player, txnDetails, provider) => {
             }
 
             transaction = await sequelize.transaction();
-
             await WalletMaster.create(
                 {
                     player_id: player.id,
@@ -215,23 +209,22 @@ const doRequery = async (player, txnDetails, provider) => {
             ).then(data => {
                 return data.get({ plain: true });
             }).catch(err => {
-                console.error(err);
                 return err;
             });
-            // update wallet balance
 
+            
             let walletInfo = await Wallets.findOne(
                 {
                     where: { player_id: player.id }
                 }
             ).then((wallet) => {
-                    wallet.update(
-                        {
-                            purchased: parseInt(wallet.purchased) + parseInt(coinsToAdd),
-                            updateAt : Date()
-                        }
-                    );
-                    return wallet.get({plain:true});
+                wallet.update(
+                    {
+                        purchased: parseInt(wallet.purchased) + parseInt(coinsToAdd),
+                        updateAt: Date()
+                    }
+                );
+                return wallet.get({ plain: true });
             }).catch(err => {
                 console.error(err);
                 throw new Error('Error in wallet update');
@@ -239,21 +232,22 @@ const doRequery = async (player, txnDetails, provider) => {
 
             await transaction.commit();
 
-            return json({ error: false, status: 'SUCCESS', message: 'Transaction is success',data: walletInfo });
+            return { error: false, status: 'SUCCESS', message: 'Transaction is success', data: walletInfo };
 
         } else if (updateResp.status == 'FAILED') {
-            return json({ error: true, status: 'FAILED', message: 'Transaction is Failed',data: walletInfo });
+            return { error: true, status: 'FAILED', message: 'Transaction is Failed', data: walletInfo };
         }
 
     } catch (err) {
-        await transaction.rolback();
-        console.error(err);
-        return json({ error: true, status: 'FAILED', message: err,data: {} });
+        // await transaction.rollback();
+        console.error('Error in Requery = ',err);
+        return { error: true, status: 'FAILED', message: err, data: {} };
     }
 }
 
 
 module.exports = {
     getWallet,
-    buyCoins
+    buyCoins,
+    requeryTxn
 }

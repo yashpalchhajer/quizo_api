@@ -48,8 +48,12 @@ router.get('/getPlans', AuthUser, PlansController.getPlans);
 router.get('/getWallet', AuthUser, WalletController.getWallet);
 router.get('/getPaymentOptions', AuthUser, ProvidersController.getPaymentProviders);
 router.post('/buyCoins',AuthUser, WalletController.buyCoins);
-// router.post('/buyCoins', AuthUser, (req, res) => {
-//   return res.status(200).json({ error: false, message: 'Under development' });
-// });
+
+router.post('/requery-txn',AuthUser,WalletController.requeryTxn);
+
+router.post('/paytm-call-back',function(req,res){
+  console.log(req.body);
+  return res.status(200);
+});
 
 module.exports = router;

@@ -2,9 +2,8 @@
 const mongoos = require('mongoose');
 
 const mongoConfig = require('../config/config.json').mongoDb;
-// const mongoUri = 'mongodb://'+mongoConfig.username + ":" + mongoConfig.password + "@" + mongoConfig.host + '/' + mongoConfig.collection;
-
-const mongoUri = 'mongodb://127.0.0.1:27017/quizo_api';
+//const mongoUri = 'mongodb://'+mongoConfig.username + ":" + mongoConfig.password + "@" + mongoConfig.host + '/' + mongoConfig.collection;
+ const mongoUri = 'mongodb://localhost/quizo_api';
 
 mongoos.Promise = global.Promise;
 mongoos.connect(mongoUri, { useNewUrlParser: true });

@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: { model: 'apiproviders', key: 'id' }
     },
+    transaction_type: {
+      type: DataTypes.ENUM('ADD', 'REDEEM'),
+      allowNull: false
+    },
     status: {
       type: DataTypes.ENUM('INITIATED', 'HOLD', 'SUCCESS', 'FAILED', 'REFUND'),
       allowNull: false

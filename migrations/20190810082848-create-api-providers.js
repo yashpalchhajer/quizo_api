@@ -23,6 +23,10 @@ module.exports = {
         type: Sequelize.STRING(100),
         allowNull: true
       },
+      icon:{
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
       type: {
         type: Sequelize.STRING(20),
         allowNull: false

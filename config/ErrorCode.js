@@ -67,4 +67,18 @@ module.exports = {
     PLAYERS_NOT_UPDATED_TO_BUSY_CODE: 17,
     PLAYERS_NOT_UPDATED_TO_BUSY_MESSAGE: "All players are not updated to busy",
 
+    PROVIDER_NOT_FOUND_CODE: 18,
+    PROVIDER_NOT_FOUND_MESSAGE: "No provider found this time",
+
+    TXN_NOT_FOUND_CODE:104,
+    TXN_NOT_FOUND_MESSAGE:"Transaction not found with this reference number",
+
+    INVALID_PROVIDER_CODE:101,
+    INVALID_PROVIDER_MESSAGE:"Invalid provider code received for this transaction",
+
+    INIT_TXN_ERROR: 102,
+    INIT_TXN_ERROR_MSG:"Some Error occured while transacion initiated please check status after some time.",
+
+    
+
 }

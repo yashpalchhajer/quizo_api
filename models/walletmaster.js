@@ -1,6 +1,9 @@
 'use strict';
+const { TABLE_WALLET_MASTERS } = require('../config/dbConstant');
+
+
 module.exports = (sequelize, DataTypes) => {
-  const WalletMaster = sequelize.define('WalletMaster', {
+  const WalletMaster = sequelize.define(TABLE_WALLET_MASTERS, {
     id: {
       allowNull: false,
       autoIncrement: true,

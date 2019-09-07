@@ -5,7 +5,7 @@ const PaymentMaster = require('../../models').qa_payment_masters;
 const sequelize = require('../../models/index').sequelize;
 const PaytmUtility = require('./PaytmUtility');
 
-const walletDepositInitiate = async (request, provider,res) => {
+const walletDepositInitiate = async (request, provider, res) => {
     let transaction;
 
     try {
@@ -52,10 +52,33 @@ const walletDepositInitiate = async (request, provider,res) => {
 
 
 
-        let resp = PaytmUtility.getInitCheckSum(initResp, request.player, provider.credentials,res);
-        // call paytm Utility to get checksum
-        
-        return resp;
+        await PaytmUtility.getInitCheckSum(initResp, request.player, provider.credentials).then(function (check_sum) {
+            let providerCredentials = JSON.parse(provider.credentials);
+
+            res.status(200).json({
+                error: false,
+                status: 'SUCCESS',
+                message: '',
+                data: {
+                    "order_id": initResp.id.toString(), // to be sent to provider
+                    "reference_number": initResp.transaction_number, // to be shown to user
+                    "provider_reference": '',// to be receive from provider
+                    "amount": initResp.amount.toString(),
+                    "cust_id": initResp.player_id.toString(),
+                    "MID": providerCredentials.MID,
+                    "channel_id": providerCredentials.CHANNEL_ID,
+                    "industry_id": providerCredentials.INDUSTRY_TYPE_ID,
+                    "website": providerCredentials.WEBSITE,
+                    "callback_url": providerCredentials.CALLBACK_URL,
+                    "check_sum": check_sum,
+                    "email": request.player.email,
+                    "phone_number": request.player.contact_number
+                }
+            });
+
+        });
+
+        return res;
     } catch (err) {
         await transaction.rollback();
         console.error('Error in paytm ++++++++++++++ ',err);
@@ -63,13 +86,12 @@ const walletDepositInitiate = async (request, provider,res) => {
     }
 }
 
-const walletUpdateStatus = async (request, provider) => {
+const walletUpdateStatus = async (txnData, provider) => {
 
     let transaction;
     try {
-        const reqBody = request.body;
 
-        const confirmHash = await PaytmUtility.verifyHash();
+        const confirmHash = await PaytmUtility.verifyHash(txnData, provider.credentials);
 
         if (!confirmHash) {
             throw new Error("Encrypted token verification failed");
@@ -77,23 +99,8 @@ const walletUpdateStatus = async (request, provider) => {
 
 
         /** check for parameters for request */
-        // transaction = await sequelize.transaction();
+        transaction = await sequelize.transaction();
 
-        let txnData = PaymentMaster.findOne(
-            {
-                where: {
-                    id: reqBody.transaction_id,
-                    status: "INITIATED",
-                    transaction_type: "ADD",
-                    player_id: reqBody.player_id
-                }
-            }
-        ).then((data) => {
-            return data;
-        }).catch(err => {
-            console.error(err);
-            return err;
-        })
 
         // need to add txn manag in select till update
 
@@ -116,7 +123,7 @@ const walletUpdateStatus = async (request, provider) => {
         }
 
         if (requeryResp.status == 'SUCCESS') {
-            txnData.updateAll(
+            await txnData.update(
                 {
                     status: 'SUCCESS',
                     provider_transaction_number: requeryResp.txn_number,
@@ -126,7 +133,7 @@ const walletUpdateStatus = async (request, provider) => {
                 { transaction: transaction }
             );
         } else if (requeryResp.status == 'FAILED') {
-            txnData.updateAll(
+            await txnData.update(
                 {
                     status: 'FAILED',
                     provider_transaction_number: requeryResp.txn_number,
@@ -136,6 +143,8 @@ const walletUpdateStatus = async (request, provider) => {
                 { transaction: transaction }
             );
         }
+
+        await transaction.commit();
 
         return {
             error: false,
@@ -151,7 +160,7 @@ const walletUpdateStatus = async (request, provider) => {
 
     } catch (err) {
         await transaction.rollback();
-        console.error(err);
+        console.error('Error in txn requery = ', err);
         return {
             error: true,
             msg: err,

@@ -119,7 +119,8 @@ module.exports = (sequelize, DataTypes) => {
 
   OTPTokens.resendOTP = (player, action,retry) => {
     return new Promise((resolve, reject) => {
-      let otp = Math.floor(Math.random() * Math.floor(process.env.OTP_LENTGH));
+      let otp = Math.floor(Math.random() * (+Number(process.env.OTP_LENTGH) - +1)) + +1 + +Number(process.env.OTP_LENTGH);
+      
       const validUpto = dateFormat('yyyy-mm-dd HH:MM:ss');
 
       OTPTokens.create({

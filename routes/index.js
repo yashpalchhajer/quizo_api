@@ -56,4 +56,6 @@ router.post('/paytm-call-back',function(req,res){
   return res.status(200);
 });
 
+router.get('/test-skills',AuthUser,GameController.testSkills);
+
 module.exports = router;

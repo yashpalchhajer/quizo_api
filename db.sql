@@ -90,3 +90,8 @@ ALTER TABLE `qa_payment_masters` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMEN
 
 INSERT INTO `qa_api_providers` (`id`, `name`, `contact_number`, `email`, `icon`, `type`, `status`, `credentials`, `createdAt`, `updatedAt`) VALUES (NULL, 'Paytm', '8098565898', 'support@paytm.com', NULL, 'PAYMENT', 'ACTIVE', '{"MID":"MhLVOC68539327443881","WEBSITE":"WEBSTAGING","CHANNEL_ID":"APP","INDUSTRY_TYPE_ID":"Retail","MERCHANT_KEY":"WuqxX@Ec2L%KgBWv","TRANSACTION_URL":"https://securegw-stage.paytm.in/theia/processTransaction","REQUERY_URL":"https://securegw-stage.paytm.in/merchant-status/getTxnStatus","CALLBACK_URL":"http://ec2-18-219-98-11.us-east-2.compute.amazonaws.com:8080/paytm-call-back"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+
+-- Test Skills
+INSERT INTO `qa_quiz_categories` (`id`, `name`, `status`, `createdAt`, `updatedAt`) VALUES (NULL, 'Test', 'ACTIVE', CURRENT_TIMESTAMP, NULL);
+
+INSERT INTO `qa_quiz_configs` (`id`, `category_id`, `name`, `icon`, `quiz_cost`, `team_size`, `min_members`, `winner_prize`, `quiz_duration`, `no_of_questions`, `question_interval`, `status`, `createdAt`, `updatedAt`) VALUES (NULL, '4', 'Test Skills', NULL, '0', '1', '1', '10', '2.5', '5', '30', 'ACTIVE', CURRENT_TIMESTAMP, NULL);

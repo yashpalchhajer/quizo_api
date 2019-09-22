@@ -79,6 +79,7 @@ module.exports = {
     INIT_TXN_ERROR: 102,
     INIT_TXN_ERROR_MSG:"Some Error occured while transacion initiated please check status after some time.",
 
-    
+    QUIZ_NOT_FOUND:103,
+    QUIZ_NOT_FOUND_MSG:"No Quiz Found For This Category",
 
 }

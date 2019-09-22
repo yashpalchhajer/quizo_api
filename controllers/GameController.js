@@ -10,6 +10,7 @@ const DateHelpers = require('../libraries/DateHandlers');
 const ErrorCode = require('../config/ErrorCode');
 const SubmitAnswer = require('../libraries/submitAnswer');
 const Utilities = require('../libraries/Utilities');
+const QuestionMaster = require('../models').qa_question_masters;
 const requestToPlay = async (req) => {
     let reqBody = req;
 
@@ -442,9 +443,94 @@ const autoSubmitAns = async (question, quesReq) => {
 
 }
 
+const testSkills = async (req, res) => {
+    try {
+        let reqBody = req.query;
+
+        const rules = {
+            contact_number: 'required|min:10|max:10',
+        };
+
+        const validator = new Validator(reqBody, rules);
+
+        if (validator.fails()) {
+            let err = { error: true, status: 'FAILED', message: 'Validation Errors!', validation: validator.rules };
+            return res.status(200).json(err);
+        }
+
+        let quizDetails = await QuizConfigs.findOne({
+            raw: true,
+            where: {
+                id: 4,
+                status: 'ACTIVE'
+            },
+            attributes: ['id', 'name', 'icon', 'quiz_cost', 'team_size', 'min_members', 'winner_prize', 'quiz_duration', 'no_of_questions', 'question_interval']
+        }).then((data) => {
+            if (data) {
+                return data;
+            } else {
+                return false;
+            }
+        });
+
+        if (!quizDetails) {
+            let err = { error: true, status: 'FAILED', message: ErrorCode.QUIZ_NOT_FOUND_MSG };
+            return res.status(200).json(err);
+        }
+
+        // to do with join
+        let questions = await QuestionMaster.findAll({
+            raw: true,
+            where: {
+                quiz_id: 4
+            },
+            attributes: ['id', 'question_string', 'options', 'answer']
+        }).then((data) => {
+            if (!data) {
+                return false;
+            } else {
+                return data;
+            }
+        });
+        // to do with join
+
+        if (!questions || questions.length == 0) {
+            let err = { error: true, status: 'FAILED', message: ErrorCode.NO_QUESTION_AVAILABLE_FOR_QUIZ_MESSAGE };
+            return res.status(200).json(err);
+        }
+
+        let response = {
+            error: false,
+            status: 'SUCCESS',
+            data: {
+                quiz: quizDetails,
+                questions: questions
+            }
+        };
+
+        return res.status(200).json(response);
+    } catch (err) {
+        console.log(err);
+        return res.status(err.code).json({ error: err });
+
+    }
+
+}
+
+const submitTest = async () => {
+    try{
+
+    }catch(err){
+        console.log(err);
+        return res.status(err.code).json({ error: err });
+
+    }
+}
+
 module.exports = {
     requestToPlay,
     scheduleQuestion,
     submitUserAnswer,
-    quitGame
+    quitGame,
+    testSkills
 }

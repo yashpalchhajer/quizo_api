@@ -78,7 +78,7 @@ const buyCoins = async (req, res) => {
 
         let planDetail = await Plans.getPlanById(reqBody.plan_id);
 
-        if (!planDetail) {
+        if (!planDetail || planDetail.length <= 0 ) {
             return res.status(ErrorCodes.RESOURCE_NOT_FOUND_CODE).json({ error: true, status: 'FAILED', message: ErrorCodes.RESOURCE_NOT_FOUND_MESSAGE, });
         }
 
@@ -182,7 +182,7 @@ const doRequery = async (player, txnDetails, provider) => {
 
             /** get plan details to coins */
             let Plan = await Plans.getPlanById(txnDetails.plan_id);
-            if (!Plan) {
+            if (!Plan || Plan.length <= 0 ) {
                 throw new Error("Invalid plan details");
             }
             let coinsToAdd = 0;

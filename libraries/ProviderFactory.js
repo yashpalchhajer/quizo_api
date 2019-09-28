@@ -1,5 +1,6 @@
 
 const Paytm = require('../Vendors/Paytm/Paytm');
+const Razorpay = require('../Vendors/Razorpay/Razorpay');
 
 const paymentInitiate = (request, provider,res) => {
 
@@ -11,7 +12,7 @@ const paymentInitiate = (request, provider,res) => {
             break;
 
         case 2:
-
+        Razorpay.initiateOrder(request,provider,res);
             break;
 
         default:
@@ -34,7 +35,7 @@ const updatePaymentStatus = async (request, provider) => {
             break;
 
         case 2:
-
+            providerResp = await Razorpay.order(request,provider);
             break;
 
         default:

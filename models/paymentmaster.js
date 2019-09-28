@@ -54,9 +54,25 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER(11),
       defaultValue: null
     },
-    reference_number: {
+    reference_number_1: {
       type: DataTypes.STRING(50),
-      defaultValue: ''
+      defaultValue: '',
+      allowNull:true
+    },
+    reference_number_2: {
+      type: DataTypes.STRING(255),
+      defaultValue: '',
+      allowNull:true
+    },
+    reference_number_3: {
+      type: DataTypes.STRING(255),
+      defaultValue: '',
+      allowNull:true
+    },
+    reference_number_4: {
+      type: DataTypes.TEXT,
+      defaultValue: '',
+      allowNull:true
     },
     createdAt: {
       allowNull: false,

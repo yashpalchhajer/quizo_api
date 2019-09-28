@@ -53,9 +53,25 @@ module.exports = {
         type: Sequelize.INTEGER(11),
         defaultValue: null
       },
-      reference_number: {
+      reference_number_1: {
         type: Sequelize.STRING(50),
-        defaultValue: ''
+        defaultValue: '',
+        allowNull:true
+      },
+      reference_number_2: {
+        type: Sequelize.STRING(255),
+        defaultValue: '',
+        allowNull:true
+      },
+      reference_number_3: {
+        type: Sequelize.STRING(255),
+        defaultValue: '',
+        allowNull:true
+      },
+      reference_number_4: {
+        type: Sequelize.TEXT,
+        defaultValue: '',
+        allowNull:true
       },
       createdAt: {
         allowNull: false,

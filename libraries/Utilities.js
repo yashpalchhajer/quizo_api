@@ -20,6 +20,7 @@ const generateReferenceId = (prov) => {
 
     let year = curDate.getFullYear().toString().substr(-2);
     let month = ("0" + (curDate.getMonth() + 1)).slice(-2);
+    let day = ("0" + (curDate.getDate() + 1)).slice(-2);
     let randomChar           = '';
 
     let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -28,7 +29,7 @@ const generateReferenceId = (prov) => {
         randomChar += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     
-    return ""+year+""+month+""+prov+""+randomChar.toUpperCase();
+    return ""+year+""+month+""+day+""+prov+""+randomChar.toUpperCase();
 }
 
 

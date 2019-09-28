@@ -88,6 +88,8 @@ const initiateOrder = async (request, provider, res) => {
                         "reference_number": initResp.transaction_number,
                         "provider_reference": data.id,
                         "amount": initResp.amount,
+                        "merchant_name": providerCredentials.merchant_name,
+                        "key_id": providerCredentials.key_id
                     }
                 });
 
@@ -117,7 +119,7 @@ const initiateOrder = async (request, provider, res) => {
         });
 
     } catch (err) {
-        console.error('Error in razorpay ++++++++++++++ ', err);        
+        console.error('Error in razorpay ++++++++++++++ ', err);
         await transaction.rollback();
         return err;
     }

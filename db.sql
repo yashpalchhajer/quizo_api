@@ -97,7 +97,7 @@ INSERT INTO `qa_quiz_categories` (`name`, `status`, `createdAt`, `updatedAt`) VA
 INSERT INTO `qa_quiz_configs` (`category_id`, `name`, `icon`, `quiz_cost`, `team_size`, `min_members`, `winner_prize`, `quiz_duration`, `no_of_questions`, `question_interval`, `status`, `createdAt`, `updatedAt`) VALUES (2, 'Test Skills', NULL, '0', '1', '1', '10', '2.5', '5', '30', 'ACTIVE', CURRENT_TIMESTAMP, NULL);
 
 -- Razorpay
-INSERT INTO `qa_api_providers` (`id`, `name`, `contact_number`, `email`, `icon`, `type`, `status`, `credentials`, `createdAt`, `updatedAt`) VALUES (NULL, 'Razorpay', '9509807418', 'support@razorpay.com', NULL, 'PAYMENT', 'ACTIVE', '{\"key_id\":\"rzp_test_GvQey6Vx6T3vie\",\"key_secret\":\"vmP8bjFoMkIF1KkdBkZetlQd\"}', '2019-09-28 21:53:45', '2019-09-28 21:53:45');
+INSERT INTO `qa_api_providers` (`id`, `name`, `contact_number`, `email`, `icon`, `type`, `status`, `credentials`, `createdAt`, `updatedAt`) VALUES (NULL, 'Razorpay', '9509807418', 'support@razorpay.com', NULL, 'PAYMENT', 'ACTIVE', '{\"key_id\":\"rzp_test_6Gsznm9ZpIWSoo\",\"key_secret\":\"SjXW2k9An1PiyPBEDSKqSN4f\",\"merchant_name\":\"Quizo\"}', '2019-09-28 21:53:45', '2019-09-28 21:53:45');
 
 
 ALTER TABLE `qa_payment_masters` CHANGE `reference_number` `reference_number_1` VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT '' COMMENT 'provider reference number in case of provider provide';

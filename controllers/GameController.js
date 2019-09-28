@@ -461,7 +461,7 @@ const testSkills = async (req, res) => {
         let quizDetails = await QuizConfigs.findOne({
             raw: true,
             where: {
-                id: 4,
+                id: 2,
                 status: 'ACTIVE'
             },
             attributes: ['id', 'name', 'icon', 'quiz_cost', 'team_size', 'min_members', 'winner_prize', 'quiz_duration', 'no_of_questions', 'question_interval']
@@ -482,7 +482,7 @@ const testSkills = async (req, res) => {
         let questions = await QuestionMaster.findAll({
             raw: true,
             where: {
-                quiz_id: 4
+                quiz_id: 2
             },
             attributes: ['id', 'question_string', 'options', 'answer']
         }).then((data) => {

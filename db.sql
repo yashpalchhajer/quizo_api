@@ -92,6 +92,8 @@ INSERT INTO `qa_api_providers` (`id`, `name`, `contact_number`, `email`, `icon`,
 
 
 -- Test Skills
-INSERT INTO `qa_quiz_categories` (`id`, `name`, `status`, `createdAt`, `updatedAt`) VALUES (NULL, 'Test', 'ACTIVE', CURRENT_TIMESTAMP, NULL);
+INSERT INTO `qa_quiz_categories` (`name`, `status`, `createdAt`, `updatedAt`) VALUES ('Test', 'ACTIVE', CURRENT_TIMESTAMP, NULL);
 
-INSERT INTO `qa_quiz_configs` (`id`, `category_id`, `name`, `icon`, `quiz_cost`, `team_size`, `min_members`, `winner_prize`, `quiz_duration`, `no_of_questions`, `question_interval`, `status`, `createdAt`, `updatedAt`) VALUES (NULL, '4', 'Test Skills', NULL, '0', '1', '1', '10', '2.5', '5', '30', 'ACTIVE', CURRENT_TIMESTAMP, NULL);
+INSERT INTO `qa_quiz_configs` (`category_id`, `name`, `icon`, `quiz_cost`, `team_size`, `min_members`, `winner_prize`, `quiz_duration`, `no_of_questions`, `question_interval`, `status`, `createdAt`, `updatedAt`) VALUES (2, 'Test Skills', NULL, '0', '1', '1', '10', '2.5', '5', '30', 'ACTIVE', CURRENT_TIMESTAMP, NULL);
+
+

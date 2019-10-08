@@ -147,6 +147,16 @@ const requeryTxn = async (req, res) => {
             return res.status(200).json({ error: true, status: 'FAILED', message: ErrorCodes.PROVIDER_NOT_FOUND_MESSAGE });
         }
 
+        if(providerDetails.id == process.env.RAZOR_PAY_ID){
+            if(!reqBody.hasOwnProperty('provider_payment_id') || reqBody.provider_payment_id == undefined || reqBody.provider_payment_id == ''){
+                return res.status(200).json({ error: true, status: 'FAILED', message: "Provider payment id missing" });
+            }
+            
+            txnDetails.update({
+                reference_number_1 : reqBody.provider_payment_id
+            });
+        }
+
         const requery = await doRequery(req.player, txnDetails, providerDetails);
 
         return res.status(200).json(requery);
@@ -161,20 +171,20 @@ const requeryTxn = async (req, res) => {
 const doRequery = async (player, txnDetails, provider) => {
     let transaction;
     try {
-        let updateResp;
+        let updateResp = '';
 
         updateResp = await ProviderFactory.updatePaymentStatus(txnDetails, provider);
 
-        if (!updateResp) {
+        if (!updateResp || updateResp.error) {
             if (updateResp.hasOwnProperty('msg') || updateResp.msg != undefined) {
-                return json({ error: true, status: 'FAILED', message: ErrorCodes.updateResp.msg });
+                return { error: true, status: 'FAILED', message: updateResp.msg };
             } else {
-                return json({ error: true, status: 'FAILED', message: ErrorCodes.SERVER_ERROR_MESSAGE });
+                return { error: true, status: 'FAILED', message: ErrorCodes.SERVER_ERROR_MESSAGE };
             }
         }
 
         if (!updateResp.data.hasOwnProperty('status') || updateResp.data.status == undefined) {
-            return json({ error: true, status: 'FAILED', message: 'Invalid response received from provider, Please check after some time.' });
+            return { error: true, status: 'FAILED', message: 'Invalid response received from provider, Please check after some time.' };
         }
 
         if (updateResp.data.status == 'SUCCESS') {

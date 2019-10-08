@@ -69,7 +69,7 @@ const walletDepositInitiate = async (request, provider, res) => {
                     "channel_id": providerCredentials.CHANNEL_ID,
                     "industry_id": providerCredentials.INDUSTRY_TYPE_ID,
                     "website": providerCredentials.WEBSITE,
-                    "callback_url": providerCredentials.CALLBACK_URL,
+                    "callback_url": providerCredentials.CALLBACK_URL + initResp.id.toString(),
                     "check_sum": check_sum,
                     "email": request.player.email,
                     "phone_number": request.player.contact_number
@@ -154,7 +154,7 @@ const walletUpdateStatus = async (txnData, provider) => {
                 transaction_id: txnData.id,
                 provider_transaction_number: txnData.provider_transaction_number,
                 reference_number: txnData.transaction_number,
-                updateed_at: Date()
+                updated_at: Date()
             }
         }
 

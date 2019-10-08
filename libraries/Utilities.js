@@ -29,7 +29,7 @@ const generateReferenceId = (prov) => {
         randomChar += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     
-    return ""+year+""+month+""+day+""+prov+""+randomChar.toUpperCase();
+    return "QZ"+""+prov+"0"+year+""+month+""+day+""+randomChar.toUpperCase();
 }
 
 

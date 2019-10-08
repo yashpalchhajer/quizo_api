@@ -18,7 +18,7 @@ const getInitCheckSum = (txnDetails, player, providerCredentials) => {
         paramarray['CHANNEL_ID'] = providerCredentials.CHANNEL_ID; //Provided by Paytm
         paramarray['TXN_AMOUNT'] = txnDetails.amount.toString(); // transaction amount
         paramarray['WEBSITE'] = providerCredentials.WEBSITE; //Provided by Paytm
-        paramarray['CALLBACK_URL'] = providerCredentials.CALLBACK_URL; //Created by app
+        paramarray['CALLBACK_URL'] = providerCredentials.CALLBACK_URL + txnDetails.id.toString(); //Created by app
         paramarray['EMAIL'] = player.email; // customer email id
         paramarray['MOBILE_NO'] = player.contact_number; // customer 10 digit mobile no.
 

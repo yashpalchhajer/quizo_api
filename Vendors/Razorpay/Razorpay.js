@@ -125,8 +125,90 @@ const initiateOrder = async (request, provider, res) => {
     }
 }
 
+const requeryTxn = async (txnDetail, provider) => {
 
+    const providerCredentials = JSON.parse(provider.credentials);
+    let transaction;
+    var razorInstance = new RazorPay({
+        key_id: providerCredentials.key_id,
+        key_secret: providerCredentials.key_secret
+    });
+
+    let returnResp = {
+        error: true,
+        msg: 'init resp',
+        data: {
+            status: txnDetail.status,
+            transaction_id: txnDetail.id,
+            provider_transaction_number: txnDetail.provider_transaction_number,
+            reference_number: '',
+            updated_at: Date()
+        }
+    };
+
+
+    await razorInstance.orders.fetch(txnDetail.provider_transaction_number).then(async (data) => {
+        /** log req res n db */
+
+        if (!data) {
+            returnResp.error = true;
+            returnResp.msg = 'Response not defined';
+            return false;
+        }
+
+        if (!data.hasOwnProperty("id") && data.id != txnDetail.provider_transaction_number) {
+            returnResp.error = true;
+            returnResp.msg = 'Order id mismatched';
+            return false;
+        }
+
+        /** 
+         *  #TODO
+         * # amount check
+         * # different status check
+         * # 
+         */
+
+        if (data.hasOwnProperty('status') && data.status == 'attempted') {
+
+            transaction = await sequelize.transaction();
+
+            await txnDetail.update(
+                {
+                    status: 'SUCCESS',
+                    updatedAt: Date(),
+                    provider_message: 'Done'
+                },
+                { transaction: transaction }
+            );
+
+            transaction.commit();
+
+            returnResp.error = false;
+            returnResp.msg = 'Transactio success';
+            returnResp.data.status = txnDetail.status;
+            returnResp.data.transaction_id = txnDetail.id;
+            returnResp.data.provider_transaction_number = txnDetail.provider_transaction_number;
+            returnResp.data.reference_number = '';
+            returnResp.data.updated_at = Date();
+            
+            return true;
+        }
+
+        
+
+
+    }).catch(err => {
+        console.error("Error in fetch order razor pay *** ",err);
+        returnResp.error = true;
+        returnResp.msg = "Error while fetching data from provider";
+    })
+
+
+    return returnResp;
+}
 
 module.exports = {
-    initiateOrder
+    initiateOrder,
+    requeryTxn
 }

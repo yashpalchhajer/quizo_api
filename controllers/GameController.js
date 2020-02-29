@@ -81,7 +81,7 @@ const requestToPlay = async (req) => {
                 playerData: playerNames,
                 quizInfo: {
                     no_of_questions: QuizData.no_of_questions,
-                    quiz_duration: QuizData.no_of_questions,
+                    quiz_duration: QuizData.quiz_duration,
                     question_interval: QuizData.question_interval,
                     isSystem: isSystem
                 }

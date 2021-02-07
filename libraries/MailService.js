@@ -7,17 +7,17 @@ const mail = async (req, res) => {
     let test = await nodemailer.createTestAccount();
 
     let transporter = nodemailer.createTransport({
-        host: "smtp.mailtrap.io",
-        port: 2525,
+        host: process.env.MAIL_HOST,
+        port: process.env.MAIL_PORT,
         auth: {
-            user: "edaf0050124cb1",
-            pass: "26ff6347553805"
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASS
         }
     });
 
     let info = await transporter.sendMail({
-        from: 'yashpalchhajer@gmail.com',
-        subject: '"Free Demo"',
+        from: process.env.MAIL_FROM,
+        subject: process.env.MAIL_DEFAULT_SUB,
         to: 'yashpalchhajer@mailinator.com',
         text: 'Hello World',
         html: '<h1> Hello World </h1>'

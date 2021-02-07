@@ -1,0 +1,15 @@
+{
+  "development": {
+    "username": "",
+    "password": "",
+    "database": "quizo_api",
+    "host": "",
+    "dialect": "mysql"
+  },
+  "mongoDb":{
+    "host":"",
+    "username":"",
+    "password":"",
+    "collection":"quizo_api"
+  }
+}

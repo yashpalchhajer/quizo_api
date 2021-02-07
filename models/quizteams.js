@@ -35,10 +35,15 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'restrict',
       onUpdate: 'no action'
     },
-    player_status:{
-      type: DataTypes.ENUM('ACTIVE','INACTIVE'),
+    player_status: {
+      type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'TERMINATED'),
       allowNull: false,
       defaultValue: 'ACTIVE'
+    },
+    quit_time: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+      allowNull: true
     },
     questions: {
       type: DataTypes.JSON,
@@ -54,11 +59,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     createdAt: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     },
     updatedAt: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     }
   }, {});
 
@@ -75,13 +82,14 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
-  QuizTeams.getTeamActivePlayersList = (teamId) => {
+  QuizTeams.getTeamActivePlayersList = (teamId, transaction) => {
     return new Promise((resolve, reject) => {
       QuizTeams.findAll({
         where: {
           team_id: teamId,
           player_status: 'ACTIVE'
-        }
+        },
+        transaction: transaction
       })
         .then((playersList) => resolve(playersList))
         .catch(err => reject(err));
@@ -93,7 +101,8 @@ module.exports = (sequelize, DataTypes) => {
       QuizTeams.findAll({
         raw: true,
         where: {
-          'player_id': id
+          'player_id': id,
+          'player_status': 'ACTIVE'
         },
         order: [['createdAt', 'DESC']],
         limit: 1
@@ -146,5 +155,41 @@ module.exports = (sequelize, DataTypes) => {
         }).catch(err => reject(err));
     });
   }
+
+  QuizTeams.terminateQuiz = (teamId) => {
+    return new Promise((resolve, reject) => {
+      QuizTeams.update(
+        {
+          status: 'TERMINATED'
+        }, {
+          where: {
+            team_id: teamId,
+            status: 'ACTIVE'
+          }
+        }
+      ).then((data) => {
+        resolve(data);
+      }).catch(err => reject(err));
+    });
+  }
+
+  QuizTeams.updateQuizPlayerScoreAndQuestions = (score, questions, teamId, playerId, transaction) => {
+    return new Promise((resolve, reject) => {
+      QuizTeams.update({
+        final_score: score,
+        questions: questions
+      }, {
+          where: {
+            team_id: teamId,
+            player_id: playerId
+          },
+          transaction: transaction
+        }
+      ).then(data => {
+        resolve(data);
+      }).catch(err => reject(err));
+    });
+  }
+
   return QuizTeams;
 };

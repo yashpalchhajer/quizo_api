@@ -1,6 +1,7 @@
 'use strict';
 const { TABLE_PLAYER_QUESTIOS } = require('../config/dbConstant');
 const Sequelize = require('sequelize');
+const messages = require('../config/ErrorCode');
 
 module.exports = (sequelize, DataTypes) => {
   const PlayerQuestions = sequelize.define(TABLE_PLAYER_QUESTIOS, {
@@ -69,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
           }
         }).then(updateCount => {
           if (updateCount[0] != 1)
-            throw new CustomError("Players questions are not updated");
+            throw new CustomError(messages.PLAYER_QUESTIONS_NOT_UPDATED_MESSAGE, PLAYER_QUESTIONS_NOT_UPDATED_CODE);
           resolve(updateCount);
         }).catch(err => {
           reject(err);

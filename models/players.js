@@ -40,17 +40,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'ACTIVE'
     },
-    is_otp_verified:{
-      type: DataTypes.ENUM('YES','NO'),
+    is_otp_verified: {
+      type: DataTypes.ENUM('YES', 'NO'),
       defaultValue: 'NO'
     },
     createdAt: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     },
     updatedAt: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     }
   }, {});
   Players.associate = function (models) {
@@ -87,7 +89,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Players.register = (reqData) => {
     return new Promise((resolve, reject) => {
-      let name = reqData.name  || null;
+      let name = reqData.name || null;
       let merchant_id = reqData.merchant_id;
       let contact_number = reqData.contact_number;
       let email = reqData.email || null;
@@ -125,9 +127,11 @@ module.exports = (sequelize, DataTypes) => {
   Players.getDetailsById = (id) => {
     return new Promise((resolve, reject) => {
       Players.findAll({
+        raw: true,
         where: {
           id: id
-        }
+        },
+        attributes:['id','name']
       }).then((data) => {
         return resolve(data);
       }).catch(err => {

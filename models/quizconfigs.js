@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0
     },
     quiz_duration: {
-      type: DataTypes.INTEGER(3),
+      type: DataTypes.DOUBLE(5,2),
       allowNull: false
     },
     no_of_questions: {
@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     question_interval: {
-      type: DataTypes.INTEGER(3),
+      type: DataTypes.DOUBLE(5,2),
       allowNull: false
     },
     status: {
@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {});
   QuizConfigs.associate = function (models) {
-    // console.log(models);
+ 
     // QuizConfigs.belongsTo(models.qa_quiz_catetories, {
     //   through: 'categories',
     //   as: 'quiz',
@@ -66,7 +66,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
   };
 
-  QuizConfigs.checkExistance = (quizId) => {
+  QuizConfigs.checkExistance = (quizId, transaction) => {
     return new Promise((resolve, reject) => {
       QuizConfigs.findOne(
         {
@@ -74,11 +74,13 @@ module.exports = (sequelize, DataTypes) => {
           where: {
             id: quizId,
             status: 'ACTIVE'
-          }
+          },
+          transaction: transaction
         }
       ).then(quizData => {
         resolve(quizData);
       }).catch(err => {
+        console.log(err);
         reject(err);
       });
     });

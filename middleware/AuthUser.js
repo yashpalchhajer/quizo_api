@@ -20,7 +20,9 @@ const AuthUser = async (req,res,next) => {
         if(!verifyDevice){
             return res.status(400).json({error:true,status:"FAILED",message: "Failed to verify device token"});
         }
-
+        if(req.method == 'GET'){
+            req.body = req.query;
+        }
         req.body['merchant_id'] = verifyDevice;
 
         const accessToken = req.headers['x-access-token'];
@@ -32,13 +34,15 @@ const AuthUser = async (req,res,next) => {
             return res.status(400).json({error:true,status:"FAILED",message: "Contact Number Missing!"});
         }
 
-        const verifyAcess = await EncryptLib.VerifyAccessToken(accessToken,req.body['contact_number']);
+        const verifyAccess = await EncryptLib.VerifyAccessToken(accessToken,req.body['contact_number']);
 
-        if(!verifyAcess){
+        if(!verifyAccess){
             return res.status(400).json({error:true,status:"FAILED",message: "Invalid access token or player id!"});
         }
 
-        req.body['player_id'] = verifyAcess;
+        req.body['player_id'] = verifyAccess.id;
+        req.player = verifyAccess;
+
         next();
 
     }catch(err){

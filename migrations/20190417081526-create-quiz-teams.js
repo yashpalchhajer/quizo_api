@@ -20,9 +20,14 @@ module.exports = {
         allowNull: false
       },
       player_status:{
-        type: Sequelize.ENUM('ACTIVE','INACTIVE'),
+        type: Sequelize.ENUM('ACTIVE','INACTIVE','TERMINATED'),
         allowNull: false,
         defaultValue: 'ACTIVE'
+      },
+      quit_time:{
+        type: Sequelize.DATE,
+        defaultValue: null,
+        allowNull: true
       },
       quiz_id: {
         type: Sequelize.INTEGER(11),

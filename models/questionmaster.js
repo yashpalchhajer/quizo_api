@@ -61,12 +61,13 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
-  QuestionMaster.getQuestion = (questionId) => {
+  QuestionMaster.getQuestion = (questionId, transaction) => {
     return new Promise((resolve, reject) => {
       QuestionMaster.findOne({
         where: {
           id: questionId
         },
+        transaction: transaction,
         attributes: { exclude: ['question_string','options', 'createdAt', 'updatedAt'] }
       }).then((question) => {
         resolve(question)

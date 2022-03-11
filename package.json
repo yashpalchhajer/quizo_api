@@ -1,5 +1,5 @@
 {
-  "name": "quizo_api",
+  "name": "My_Eye_Chat",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -21,34 +21,31 @@
     "http": "0.0.0",
     "jade": "~1.3.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.6.8",
     "morgan": "^1.9.1",
     "mysql2": "^1.6.5",
     "node-schedule": "^1.3.2",
     "nodemailer": "^6.2.1",
     "nodemon": "^1.18.11",
     "path": "^0.12.7",
-    "sequelize": "^5.2.12",
+    "sequelize": "^6.17.0",
     "socket.io": "^2.2.0",
     "static-favicon": "~1.0.0",
     "validatorjs": "^3.15.1"
   },
-  "description": "api for app quizo",
+  "description": "chat app for my eye",
   "main": "./bin/www",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yashpalchhajer/quizo_api.git"
   },
   "keywords": [
     "nodejs",
-    "express",
-    "sequelize"
+    "express"
   ],
-  "author": "Yashpal",
+  "author": "Yashpal Chhajer",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yashpalchhajer/quizo_api/issues"
+    "url": "https://github.com/yashpalchhajer"
   },
-  "homepage": "https://github.com/yashpalchhajer/quizo_api#readme"
+  "homepage": "https://github.com/yashpalchhajer"
 }

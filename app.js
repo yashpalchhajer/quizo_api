@@ -11,9 +11,6 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var cors = require('cors');
 
-var Plans = require('./mongoose/index').models.Plans;
-var mongoDb = require('./mongoose/index').connectionObj;
-
 var app = express();
 
 app.use(express.static('public'))
@@ -76,35 +73,29 @@ app.use(function (err, req, res, next) {
     });
 });
 
-const GameController = require('./controllers/GameController');
+const ChatController = require('./controllers/ChatController');
 let io = require('socket.io')();
 app.io = io;
 global.io = io;
+
+global.socketUsers = [];
+
 // let schedular = require('node-schedule');
 global.schedulledJobs = [];
 global.io.on('connection',function(socket){
     console.log('conn establish');
 
-    socket.on('joinRoom',function(data){
-        console.log('room joined success');
-        socket.join(data.teamId);
-        GameController.scheduleQuestion(data);
-    });
-
-    socket.on('requestToPlay',function(request){
-        if(request.hasOwnProperty('contact_number') && request.hasOwnProperty('quiz_id')){
-            request.socket_id = socket.id;
-            GameController.requestToPlay(request);
-        }else{
-            let err = { error: true, status: 'FAILED', message: "Validation errors", "validation": 'Required Parameters Not Found!' };
-            global.io.sockets.connected[socket.id].emit('showError', err);
-        }
-    });
-
-    socket.on('quitGame',function(request){
+    socket.on('joinChat', function(request){
+        console.log('Chat join');
+        // verify auth
+        
         request.socket_id = socket.id;
-        GameController.quitGame(request);
+        console.log('in app', request);
+
+        ChatController.joinChat(request);
+
     });
+
 
     socket.on('disconnect',function(request){
         console.log('disconnects');

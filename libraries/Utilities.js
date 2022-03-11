@@ -32,10 +32,25 @@ const generateReferenceId = (prov) => {
 }
 
 
+const checkUserConnected = (userId) => {
+    let pos = null;
+    for(let i = 0; i < global.socketUsers.length; i++){
+        if(global.socketUsers[i].userId == userId){
+            pos = i;
+            break;
+        }
+    }
+
+    return pos;
+
+}
+
 module.exports = {
     randomOption,
     usleep,
     getRandomSeconds,
-    generateReferenceId
+    generateReferenceId,
+
+    checkUserConnected
 }
 

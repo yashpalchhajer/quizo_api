@@ -2,6 +2,8 @@
 
 const PREFIX = 'qa_';
 
+const TABLE_USER_MASTER = 'users';
+
 const TABLE_MERCHANT_MASTER = PREFIX+'merchant_masters';
 const TABLE_PLAYERS = PREFIX+'players';
 const TABLE_OTP_TOKENS = PREFIX+'otp_tokens';
@@ -30,5 +32,7 @@ module.exports = {
     TABLE_API_PROVIDERS,
     TABLE_PAYMENT_MASTERS,
     TABLE_WALLET_MASTERS,
-    TABLE_WALLETS
+    TABLE_WALLETS,
+
+    TABLE_USER_MASTER
 }

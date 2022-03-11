@@ -4,44 +4,25 @@ const EncryptLib = require('../libraries/EncryptLib');
 
 const AuthUser = async (req,res,next) => {
     try{
-        const deviceToken = req.headers['x-device-token'];
-        const merchantId = req.headers['merchant_id'];
+        const accessToken = req.headers['x-user-token'];
+        const userId = req.headers['user_id'];
 
-        if(!deviceToken){
+        if(!accessToken){
             return res.status(400).json({auth:false,message:'No token provided'});
         }
 
-        if(!merchantId){
-            return res.status(400).json({auth:false,message:'Merchant id missing'});
+        if(!userId){
+            return res.status(400).json({auth:false,message:'User id missing'});
         }
 
-        const verifyDevice = await EncryptLib.VerifyDeviceToken(deviceToken,merchantId);
-
-        if(!verifyDevice){
-            return res.status(400).json({error:true,status:"FAILED",message: "Failed to verify device token"});
-        }
-        if(req.method == 'GET'){
-            req.body = req.query;
-        }
-        req.body['merchant_id'] = verifyDevice;
-
-        const accessToken = req.headers['x-access-token'];
-        if(!accessToken){
-            return res.status(400).json({error:true,status:"FAILED",message: "Access token missing!"});
-        }
-
-        if(!req.body['contact_number']){
-            return res.status(400).json({error:true,status:"FAILED",message: "Contact Number Missing!"});
-        }
-
-        const verifyAccess = await EncryptLib.VerifyAccessToken(accessToken,req.body['contact_number']);
+        const verifyAccess = await EncryptLib.VerifyAccessToken(accessToken, userId);
 
         if(!verifyAccess){
             return res.status(400).json({error:true,status:"FAILED",message: "Invalid access token or player id!"});
         }
 
-        req.body['player_id'] = verifyAccess.id;
-        req.player = verifyAccess;
+        req.body['user_id'] = verifyAccess.id;
+        req.user = verifyAccess;
 
         next();
 

@@ -1,2 +1,2 @@
 # quizo
-A api with node for a paired quiz competition game
+A api with node for a one to one, or group chat with push notifications

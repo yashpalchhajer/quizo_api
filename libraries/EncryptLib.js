@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken');
 // const bcrypt = require('bcryptjs');
 const MerchantMaster = require('../models').qa_merchant_masters;
-const Player = require('../models').qa_players;
+const UserMaster = require('../models').users;
 
 
 const getAccessToken = (player) => {
@@ -38,25 +38,23 @@ const VerifyDeviceToken = (token, merchantId) => {
     })
 }
 
-const VerifyAccessToken = (token, contact_number) => {
+const VerifyAccessToken = (token, userId) => {
     return new Promise((resolve, reject) => {
-        Player.findOne({
+        UserMaster.scope('excludeCreatedAtUpdateAt').findOne({
             where: {
-                contact_number: contact_number,
-                status: 'ACTIVE',
-                is_otp_verified: 'YES'
+                id: userId
             }
-        }).then(player => {
+        }).then(user => {
 
-            if (!player) {
-                reject('Player is not registered or OTP is not verified!');
+            if (!user) {
+                reject('user is not registered or OTP is not verified!');
             }
 
-            jwt.verify(token, player.contact_number, (err, decoded) => {
+            jwt.verify(token, user.password, (err, decoded) => {
                 if (err) {
                     reject(err);
                 }
-                resolve(player.get({ plain: true }));
+                resolve(user.get({ plain: true }));
             });
         }).catch(error => {
             reject(error);

@@ -804,12 +804,28 @@ p#myScore{
 
         function startChat(){
             let data = {
-                'userId'    : 987
+                'userId'    : 11220029
             };
 
-            socket.emit('joinChat', data);
+            socket.emit('register', data);
         }
 
+        function sendMessage(){
+            let data = {
+                from: 11220029,
+                to: 11221343,
+                message: 'Dummy text',
+                cid: Math.random(99),
+                name: 'dummy name'
+            };
+
+            socket.emit('message', data);
+        }
+
+        socket.on('clientMessage', function(data){
+            console.log('message received');
+            console.log(data);
+        });
 
         function startQuiz() {
             index = 0;

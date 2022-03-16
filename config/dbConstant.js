@@ -6,6 +6,10 @@ const TABLE_USER_MASTER = 'users';
 const USER_REQUEST_CHATS = 'user_request_chats';
 const USER_MESSAGE_THREAD = 'user_message_thread';
 const USER_CHAT_MESSAGE = 'user_chat_message';
+const EVENT_JOINED_USER = 'event_joined_users';
+const GROUP_CHAT = 'group_chat';
+const TRIBE_JOINED_USERS = 'tribe_joined_users';
+const TRIBE_GROUP_CHAT = 'tribe_group_chat';
 
 const TABLE_MERCHANT_MASTER = PREFIX+'merchant_masters';
 const TABLE_PLAYERS = PREFIX+'players';
@@ -40,5 +44,9 @@ module.exports = {
     TABLE_USER_MASTER,
     USER_REQUEST_CHATS,
     USER_MESSAGE_THREAD,
-    USER_CHAT_MESSAGE
+    USER_CHAT_MESSAGE,
+    EVENT_JOINED_USER,
+    GROUP_CHAT,
+    TRIBE_JOINED_USERS,
+    TRIBE_GROUP_CHAT
 }

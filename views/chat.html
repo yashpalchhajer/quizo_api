@@ -798,7 +798,6 @@ p#myScore{
         progressBar.classList.add("hide");
         progressBar.setAttribute("aria-valuemax", quizLength);
 
-        message.innerHTML = "Hey..! " + playerData.name + " welcome to quizo! <br />Would you like to start?";
         startButton.setAttribute("style", "display:visible");
 
 
@@ -806,8 +805,11 @@ p#myScore{
             let data = {
                 'userId'    : 11220029
             };
+            socket.emit('register', data, (response) => {
+                console.log('call back');
+                console.log(response.status); // ok
+            });
 
-            socket.emit('register', data);
         }
 
         function sendMessage(){
@@ -847,36 +849,10 @@ p#myScore{
 
         }
 
-        socket.on('teamResp', function (data) {
-            playerId = data.player.playerId;
-            teamId = data.teamId;
-            let req = {
-                quizInfo: data.quizInfo,
-                teamId: data.teamId
-            };
-            socket.emit('joinRoom', req);
-            index = 0;
-            quizLength = data.quizInfo.no_of_questions;
-            showProgress(index);
-            // showQuestion();
+        socket.on('error', function(err){
+            console.log("Error event");
+            console.log(err);
         });
-
-        socket.on('fireQuest', function (data) {
-            questionTime = data.data.questionPushTime;
-            questionId = data.data.id;
-            showQuestion(data);
-        });
-
-        socket.on('notifyTeam',function(res){
-            if(res.data.playerId != playerId){
-                showError(res.data.playerName + ' has submitted answer');
-            }
-        })
-
-        socket.on('showWinner',function(res){
-            showScore(res);
-        });
-
 
         function showQuestion(question) {
             showQuizButtons();
@@ -1134,6 +1110,27 @@ p#myScore{
         show loader
 
         */
+
+        function groupChat()
+        {
+            let data = {
+                'user_id'   :   11221421,
+                'event_id'  :   41,
+                'message'   :   'user message from client'
+            }
+
+            socket.emit('eventChat', data);
+        }
+
+        function tribeChat(){
+            let data = {
+                'user_id'   :   11220029,
+                'tribe_id'  :   33,
+                'message'   :   'tribe message from client'
+            }
+
+            socket.emit('tribeChat', data);
+        }
 
 
     </script>

@@ -33,23 +33,18 @@ module.exports = (sequelize, DataTypes) => {
 
   UserRequestChats.getRequest = (from, to) => {
       return new Promise((resolve, reject)  =>  {
-        UserRequestChats.scope('excludeCreatedAtUpdateAt').findOne({
-            where: {
-              from: from, 
-              to: to
-            }
-        }).then(userRequest => {
-            if(!userRequest){
-                reject("User request not found");
-            }
 
-            resolve(userRequest);
+        sequelize.query("SELECT * FROM `user_request_chats` WHERE (`from` = :from AND `to` = :to) OR (`to` = :from AND `from` = :to)LIMIT 1;",
+          { replacements: { from: from, to: to }, type: sequelize.QueryTypes.SELECT }
+        ).then(function(req){
 
-        }).catch(err => {
-            console.error("Error in User request fetch" ,err);
-            reject(err);
-        })
-      })
+          if(req.length <= 0){
+            reject("User request not found");
+          }
+          resolve(req);
+        }).catch(err => reject(err));
+
+      });
   }
 
 

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Chat</title>
+</head>
+<body>
+    
+    <input type="text" name="userId" id="userId"> <button onclick="startChat()"> Join </button>
+
+    <br>
+
+    <input type="text" name="partner" id="partner">
+    <input type="text" name="msg" id="msg">
+    <button onclick="sendMessage()">Send</button>
+
+    <p id="rawMsg"></p>
+
+    <script src="socket.io/socket.io.js"></script>
+
+    <script>
+        var serverUrl = window.location.origin + '/';
+        var socket = io(serverUrl, { 'transports': ['websocket'], 'reconnection': true, 'secure': true });
+
+        socket.on('clientMessage', (data) => {
+            console.log('client message');
+            document.getElementById('rawMsg').innerHTML += JSON.stringify(data);
+        });
+
+        socket.on('showError',function(data){
+            console.log("error in socket", data);
+        })
+        function startChat(){
+            let data = {
+                'userId'    : document.getElementById("userId").value,
+            };
+
+            socket.emit('register', data);
+
+        }
+
+        function sendMessage(){
+            let data = {
+                from: document.getElementById("userId").value,
+                to: document.getElementById("partner").value,
+                message: document.getElementById("msg").value,
+                cid: Math.random(99),
+                name: 'dummy name'
+            };
+
+            socket.emit('message', data);
+        }
+   </script>
+
+</body>
+</html>

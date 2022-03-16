@@ -80,25 +80,54 @@ global.io = io;
 
 global.socketUsers = [];
 
-// let schedular = require('node-schedule');
+
 global.schedulledJobs = [];
 global.io.on('connection',function(socket){
-    console.log('conn establish');
 
-    socket.on('joinChat', function(request){
-        console.log('Chat join');
+    socket.on('register', function(request){
+        socket.join(request.userId);
         // verify auth
-        
         request.socket_id = socket.id;
-        console.log('in app', request);
 
         ChatController.joinChat(request);
 
     });
 
+    /**
+     * user_id
+     * message
+     * event_id
+     * 
+     */
+    socket.on('eventChat', function(request){
+        request.socket_id = socket.id;
+        ChatController.handleEventChat(request);
+    });
+
+    socket.on('tribeChat', function(request){
+        request.socket_id = socket.id;
+        console.log(request);
+        ChatController.handleTribeChat(request);
+    });
+
+
+    /**
+     * from
+     * to
+     * message
+     * cid
+     * name
+     * 
+     */
+    socket.on('message', function(request){
+        request.socket_id = socket.id;
+        ChatController.handleMessage(request);
+    })
+
 
     socket.on('disconnect',function(request){
         console.log('disconnects');
+        // remove form user socket
         console.log(global.io.sockets.adapter.rooms);
     });
 });

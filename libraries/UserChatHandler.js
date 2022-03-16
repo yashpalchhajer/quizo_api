@@ -7,20 +7,7 @@ const isEligibleForChat = async (from, to) => {
         let chatRequest = await UserRequestChats.getRequest(from, to);
 
         if(!chatRequest){
-
-            /** @TODO
-            * need to re factor reverCheck condition, it need to do in one query with (from, to) or (to, from)
-            * but operator was not working and due to lack of time this solution was implemented
-            * will 
-            */ 
-            let reverseCheck = await UserRequestChats.getRequest(to, from);
-            if(!reverseCheck){
-                let err = { error: true, status: 'FAILED', message: "User is not authorized to chat" };
-                console.log(err);
-                // global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
-            }else{
-                return true;
-            }
+            return false;
         }else{
             return true;
         }

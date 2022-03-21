@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         }).then(joinData => {
             if(!joinData){
-                reject("User has not joined this event");
+                  reject("User has not joined this event");
             }
 
             resolve(joinData);

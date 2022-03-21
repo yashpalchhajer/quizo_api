@@ -1,241 +1,36 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Registration</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="stylesheets/style.css">
+    <title>Chat Prog</title>
+
+    <style>
+        html, body, .container {
+            height: 100%;
+        }
+
+        .container {
+            display: -webkit-flexbox;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
 </head>
+<body style="background-image: url('https://wallpaperaccess.com/full/322648.jpg');">
 
-<body>
-    <input type="hidden" id="id" value="1">
-    <input type="hidden" id="pass" value="123456">
-    <div id="cookieConsent">
-        <div class="cookieConsentText"><span>This is only for testing purpose. </span></div>
+
+    <div class="container" style="padding-left: 5%;"> 
+        <h1 style="color:red">EXIT FROM THIS PAGE, <br> ELSE ONLY YOU WILL BE RESPONSIBLE FOR WHAT HAPPENS WITH YOU.</h1>
     </div>
-
-    <section id="registerDiv">
-        <div class="form_wrapper">
-            <div class="form_container">
-                <div class="title_container">
-                    <h2>Quizo Registration</h2>
-                </div>
-                <div class="row clearfix">
-                    <div class="">
-                        <form>
-
-                            <div class="input_field"> <span><i aria-hidden="true" class="fa fa-tty"></i></span>
-                                <input type="text" name="mobile" id="mobile" placeholder="Contact Number" minlength="10"
-                                    maxlength="10" required />
-                            </div>
-
-                            <div class="input_field"> <span><i aria-hidden="true" class="fa fa-envelope"></i></span>
-                                <input type="email" name="email" placeholder="Email" id="playerEmail" required />
-                            </div>
-
-                            <div class="input_field"> <span><i aria-hidden="true" class="fa fa-user"></i></span>
-                                <input type="text" name="name" placeholder="Name" id="playerName" required />
-                            </div>
-
-                            <div class="input_field radio_option">
-                                <input type="radio" name="radioGender" id="rd1" value="M">
-                                <label for="rd1">Male</label>
-                                <input type="radio" name="radioGender" id="rd2" value="F">
-                                <label for="rd2">Female</label>
-                                <input type="radio" name="radioGender" id="rd3" value="T">
-                                <label for="rd3">Other</label>
-                            </div>
-
-                            <input class="button btnSubmit" type="button" onclick="submitValidate()" value="Register" />
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="quizDiv">
-
-    </section>
-
-
-    <div id="snackbar">
-        <span id="errorMsg"></span>
-    </div>
-    <!-- <p class="credit">Developed by <a href="http://www.designtheway.com" target="_blank">Design the way</a></p> -->
-    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="/javascripts/register.js"></script>
-    <script>
-        window.localStorage = '';
-        window.localStorage.deviceToken = '';//'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjaGFudElkIjoxLCJpYXQiOjE1NjQyMzYxNzgsImV4cCI6MTU2NDMyMjU3OH0.5QhA1yOB-ITtkgwMjtYuRPOrKO8o9OydpAyfuEaRxVA';
-        window.localStorage.merchantId = 1;
-        window.localStorage.baseUrl = `${window.location.origin}/`;
-        window.localStorage.accessToken = '';
-        window.localStorage.playerData;
-        var registerDiv = document.getElementById('registerDiv');
-        var quizDiv = document.getElementById('quizDiv');
-        var mobileNumber = document.getElementById('mobile');
-        var playerName = document.getElementById('playerName');
-        var playerEmail = document.getElementById('playerEmail');
-
-        getToken();
-
-        function getToken() {
-            let url = `${window.localStorage.baseUrl}getToken`;
-            let req = {
-                'id': $('#id').val(),
-                'password': $('#pass').val()
-            };
-            axios.post(url, req, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                    }
-                }
-            ).then((res) => {
-                let response = res.data;
-                if (response.error == false && response.status == 'SUCCESS') {
-                    if (response.data.hasOwnProperty('token')) {
-                        window.localStorage.deviceToken = response.data.token;
-                    }
-                } else if (response.hasOwnProperty('message')) {
-                    showError(response.message);
-                } else {
-                    showError('Some error occured');
-                }
-                return true;
-            }).catch((err) => {
-                console.error(err.response.data.message);
-                showError(err.response.data.message);
-            });
-        }
-
-        function submitValidate() {
-            let mobile = mobileNumber.value;
-            let name = playerName.value;
-            let email = playerEmail.value;
-            let gender = $("input[name=radioGender]:checked").val();
-
-            if (mobile == '') {
-                showError('Please enter mobile number.')
-                return false;
-            }
-            if (email == '') {
-                showError('Please enter email.')
-                return false;
-            }
-            if (name == '') {
-                showError('Please enter name.')
-                return false;
-            }
-
-            if (gender == undefined) {
-                showError('Please select gender.')
-                return false;
-            }
-
-            callRegister();
-        }
-
-        function callRegister() {
-            let url = window.localStorage.baseUrl + 'register';
-
-            let req = {
-                "name": playerName.value,
-                "contact_number": mobileNumber.value,
-                "email": playerEmail.value,
-                "gender": "M"
-            };
-
-            axios.post(url, req, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "x-device-token": window.localStorage.deviceToken,
-                    "merchant_id": window.localStorage.merchantId
-                }
-            }
-            ).then((res) => {
-                let response = res.data;
-                if (response.error == false && response.status == 'SUCCESS') {
-                    let otp = prompt(response.data.message);
-
-                    if (otp.length != null && otp != '' && otp.length == 6) {
-                        validateOTP(otp, response.data.action);
-                    }
-
-
-                } else if (response.hasOwnProperty('message')) {
-                    showError(response.message);
-                } else {
-                    showError('Some error occured');
-                }
-                return true;
-            }).catch((err) => {
-                console.log(err);
-            });
-        }
-
-        function validateOTP(otp, action) {
-
-            let url = window.localStorage.baseUrl + 'register-otp';
-
-            let req = {
-                "contact_number": mobileNumber.value,
-                "action": action,
-                "otp": otp
-            };
-
-            axios.post(url, req, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "x-device-token": window.localStorage.deviceToken,
-                    "merchant_id": window.localStorage.merchantId
-                }
-            }
-            ).then((res) => {
-                let response = res.data.responseArr;
-                if (response.error == false && response.status == 'SUCCESS') {
-                    if (response.data.hasOwnProperty('accessToken')) {
-                        window.localStorage.accessToken = response.data.accessToken;
-                        window.localStorage.playerData = JSON.stringify(response.data.player);
-                        window.location.href = '/quiz';
-                    }
-                } else if (response.hasOwnProperty('message')) {
-                    showError(response.message);
-                } else {
-                    showError('Some error occured');
-                }
-                return true;
-            }).catch((err) => {
-                console.log(err);
-            });
-        }
-
-
-        function showError(err) {
-            if (err == '') {
-                return false;
-            }
-            var span = document.getElementById('errorMsg');
-            span.textContent = err;
-            var x = document.getElementById("snackbar");
-            x.className = "show";
-            x.style.backgroundColor = '#ce2b2b';
-
-            setTimeout(function () { x.className = x.className.replace("show", ""); }, 1500);
-        }
-
-    </script>
-
-
+    
 </body>
-
 </html>

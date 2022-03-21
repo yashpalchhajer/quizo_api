@@ -45,12 +45,28 @@ const checkUserConnected = (userId) => {
 
 }
 
+const getMultiConnections = async (userIds) => {
+
+    let positions = [];
+    for(let j = 0; j < userIds.length; j++){
+        let pos = checkUserConnected(userIds[j]);
+        if(pos != null){
+            if(global.socketUsers.hasOwnProperty(pos)){
+                positions = positions.concat(global.socketUsers[pos].conn);
+            }
+        }
+    }
+
+    return positions;
+}
+
 module.exports = {
     randomOption,
     usleep,
     getRandomSeconds,
     generateReferenceId,
 
-    checkUserConnected
+    checkUserConnected,
+    getMultiConnections
 }
 

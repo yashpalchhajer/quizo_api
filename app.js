@@ -99,15 +99,13 @@ global.io.on('connection',function(socket){
      * event_id
      * 
      */
-    socket.on('eventChat', function(request){
+    socket.on('groupChat', function(request){
         request.socket_id = socket.id;
-        ChatController.handleEventChat(request);
-    });
-
-    socket.on('tribeChat', function(request){
-        request.socket_id = socket.id;
-        console.log(request);
-        ChatController.handleTribeChat(request);
+        if(request.type === 'EVENT'){
+            ChatController.handleEventChat(request);
+        }else if(request.type === 'TRIBE'){
+            ChatController.handleTribeChat(request);
+        }
     });
 
 

@@ -35,6 +35,11 @@ router.get('/chat_test', function (req, res) {
 router.get('/socket_chat', function (req, res) {
   res.sendFile(path.join(__dirname + '/../views/socket_chat.html'));
 });
+
+router.get('/group_chat', function (req, res) {
+  res.sendFile(path.join(__dirname + '/../views/group_chat.html'));
+});
+
 router.post('/get_login', UserMasterController.getLoginToken);
 
 // router.post('/getToken', MerchanController.getDeviceToken);

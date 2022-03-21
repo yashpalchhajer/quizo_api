@@ -10,6 +10,7 @@ const EVENT_JOINED_USER = 'event_joined_users';
 const GROUP_CHAT = 'group_chat';
 const TRIBE_JOINED_USERS = 'tribe_joined_users';
 const TRIBE_GROUP_CHAT = 'tribe_group_chat';
+const USER_INFO = 'userinfo';
 
 const TABLE_MERCHANT_MASTER = PREFIX+'merchant_masters';
 const TABLE_PLAYERS = PREFIX+'players';
@@ -48,5 +49,6 @@ module.exports = {
     EVENT_JOINED_USER,
     GROUP_CHAT,
     TRIBE_JOINED_USERS,
-    TRIBE_GROUP_CHAT
+    TRIBE_GROUP_CHAT,
+    USER_INFO
 }

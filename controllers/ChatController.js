@@ -7,6 +7,11 @@ const Utilities = require('../libraries/Utilities');
 const UserChatHandler = require('../libraries/UserChatHandler');
 const UserMessageThread = require('../models').user_message_thread;
 const UserChatMessage = require('../models').user_chat_message;
+const EventJoinedUser = require('../models').event_joined_users;
+const GroupChat = require('../models').group_chat;
+const TribeJoinedUser = require('../models').tribe_joined_users;
+const TribeGroupChat = require('../models').tribe_group_chat;
+const UserInfo = require('../models').userinfo;
 
 const joinChat = async (req) => {
 
@@ -48,7 +53,7 @@ const handleMessage = async (req) => {
     if(validator.fails()){
         let err = { error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors };
         console.log(err);
-        // global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
+        global.io.to(req.socket_id).emit('showError', err);
         return false;
     }
 
@@ -56,11 +61,10 @@ const handleMessage = async (req) => {
     let isEglgible = await UserChatHandler.isEligibleForChat(req.from, req.to);
     if(!isEglgible){
         let err = { error: true, status: 'FAILED', message: "User is not eligible to chat", "validation": [] };
-        console.log(err);
-        // global.io.sockets.connected[reqBody.socket_id].emit('showError', err);
+        global.io.to(req.socket_id).emit('showError', err);
         return false;
     }
-    console.log("get thread id");
+
     // get thread ID
     let threadData  = {
         'sender_id' : req.from,
@@ -105,19 +109,209 @@ const handleMessage = async (req) => {
         "name" : req.name
     };
 
-    for(let i =0; i < senderConnections.length; i++){
-        if(global.io.sockets.connected.hasOwnProperty(senderConnections[i])){
-            console.log("connection found ", senderConnections[i]);
-            console.log('connection',global.io.sockets.connected[senderConnections[i]]);
-            global.io.sockets.connected[senderConnections[i]].emit('clientMessage', resp);
+    senderConnections = senderConnections.concat(receiverConnection);
+
+    try{
+        for(let i = 0; i < senderConnections.length; i++){
+            if(global.io.to(senderConnections[i]) != undefined){
+                global.io.to(senderConnections[i]).emit('clientMessage', resp);
+            }
         }
+    }catch(err){
+        console.error(err);
     }
 
     return true;
 
 }
 
+
+const handleEventChat = async (req) =>  {
+    try{
+
+        const rules = {
+            'user_id'   :   'required',
+            'channel_id'  :   'required',
+            'message'   :   'required'
+        };
+
+        let validator = new Validator(req, rules);
+
+        if(validator.fails()){
+            let err = { error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors };
+            console.log(err);
+            global.io.to(req.socket_id).emit('showError', err);
+            return false;
+        }
+
+        let isJoined = await EventJoinedUser.getJoinedId(req.user_id, req.channel_id);
+
+        if(!isJoined){
+            let err = { error: true, status: 'FAILED', message: "User is not a member of this event" };
+            global.io.to(req.socket_id).emit('showError', err);
+            return false;
+        }
+
+        let msgData = {
+            'user_id'   :  req.user_id,
+            'event_info_id'  :  req.channel_id,
+		    'message'   :  req.message,
+        };
+        let chatData = await GroupChat.createMessage(msgData);
+
+        if(!chatData){
+            let err = { error: true, status: 'FAILED', message: "Cannot send message to event " };
+            global.io.to(req.socket_id).emit('showError', err);
+            return false;
+        }
+
+        let senderDetails = await UserInfo.getUser(req.user_id);
+        
+        let eventUsers = await EventJoinedUser.eventUsers(req.channel_id);
+
+        let usersList = eventUsers.map( users => users.user_id);
+        usersList = Array.from( new Set(usersList));
+
+        let senderProfile =  `${process.env.MAIN_DOMAIN_URL}public/uploads/users/default_user.png`;
+        let senderFullName = "";
+        if(senderDetails !=null ){
+            if(senderDetails.profile_img != null && senderDetails.profile_img != ""){
+                senderProfile =  `${process.env.MAIN_DOMAIN_URL}public/uploads/users/${senderDetails.profile_img}`;
+            }
+
+            if(senderDetails.first_name != null){
+                senderFullName = senderDetails.first_name;
+            }
+
+            if(senderDetails.last_name != null){
+                senderFullName = `${senderFullName} ${senderDetails.last_name}`;
+            }
+
+        }
+
+        // send message to all
+        let allSendConn = await Utilities.getMultiConnections(usersList);
+        
+        let resp = {
+            "type"  :  "EVENT",
+            "to"    :  req.channel_id,
+            "from"  : req.user_id,
+            "message"   :  req.message,
+            "time"  :  "",
+            "sender_name"  :  senderFullName,
+            "sender_profile"  :  senderProfile,
+            "cid"	:	req.cid
+        };
+
+        // send to each socket
+        try{
+            for(let i = 0; i < allSendConn.length; i++){
+                if(global.io.to(allSendConn[i]) != undefined){
+                    global.io.to(allSendConn[i]).emit('groupChat', resp);
+                }
+            }
+        }catch(err){
+            console.error(err);
+        }
+
+    }catch(err){
+        console.error(err);
+    }
+}
+
+const handleTribeChat = async (req)    =>  {
+    try{
+        const rules = {
+            'user_id'   :   'required',
+            'channel_id'  :   'required',
+            'message'   :   'required'
+        }
+
+        let validator = new Validator(req, rules);
+
+        if(validator.fails()){
+            let err = { error: true, status: 'FAILED', message: "Validation errors", "validation": validator.errors };
+            global.io.to(req.socket_id).emit('showError', err);
+            return false;
+        }
+
+        let isJoined = await TribeJoinedUser.getJoinedId(req.user_id, req.channel_id);
+
+        if(!isJoined){
+            let err = { error: true, status: 'FAILED', message: "User is not a member of this tribe" };
+            global.io.to(req.socket_id).emit('showError', err);
+            return false;
+        }
+
+        let msgData = {
+            'user_id'   :  req.user_id,
+            'tribe_id'  :  req.channel_id,
+		    'message'   :  req.message,
+        };
+        // save to tribe group chat
+        let tribeMsg = await TribeGroupChat.createMessage(msgData);
+
+        if(!tribeMsg){
+            let err = { error: true, status: 'FAILED', message: "Can not send message to this tribe"};
+            global.io.to(req.socket_id).emit('showError', err);
+            return false;
+        }
+
+        let tribeUsers = await TribeJoinedUser.tribeUsers(req.channel_id);
+
+        let senderDetails = await UserInfo.getUser(req.user_id);
+
+        let senderProfile =  `${process.env.MAIN_DOMAIN_URL}public/uploads/users/default_user.png`;
+        let senderFullName = "";
+        if(senderDetails !=null ){
+            if(senderDetails.profile_img != null && senderDetails.profile_img != ""){
+                senderProfile =  `${process.env.MAIN_DOMAIN_URL}public/uploads/users/${senderDetails.profile_img}`;
+            }
+
+            if(senderDetails.first_name != null){
+                senderFullName = senderDetails.first_name;
+            }
+
+            if(senderDetails.last_name != null){
+                senderFullName = `${senderFullName} ${senderDetails.last_name}`;
+            }
+
+        }
+
+        let usersList = tribeUsers.map( users => users.user_id);
+        usersList = Array.from( new Set(usersList));
+        
+        let allSendConn = await Utilities.getMultiConnections(usersList);
+
+        let resp = {
+            "type"  :  "TRIBE",
+            "to"    :  req.channel_id,
+            "from"  : req.user_id,
+            "message"   :  req.message,
+            "time"  :  "",
+            "sender_name"  :  senderFullName,
+            "sender_profile"  :  senderProfile,
+            "cid"	:	req.cid
+        };
+        try{
+            for(let i = 0; i < allSendConn.length; i++){
+                if(global.io.to(allSendConn[i]) != undefined){
+                    global.io.to(allSendConn[i]).emit('groupChat', resp);
+                }
+            }
+        }catch(err){
+            console.error(err);
+        }
+
+        return true;
+    }catch(err){
+        console.error(err);
+    }
+}
+
 module.exports = {
     joinChat,
-    handleMessage
+    handleMessage,
+    handleEventChat,
+    handleTribeChat
 }

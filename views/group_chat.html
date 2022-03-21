@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socket Chat</title>
+    <title>Socket Group Chat</title>
 </head>
 <body>
     
-    <input type="text" name="userId" id="userId" placeholder="User Id"> <button onclick="startChat()"> Join </button>
+    <input type="text" name="userId" id="userId" placeholder="User Id" value="11221421"> <button onclick="startChat()"> Join </button>
 
     <br>
 
-    <input type="text" name="partner" id="partner" placeholder="Partner Id">
+    <input type="text" name="partner" id="partner" placeholder="Group Id" value="41">
     <input type="text" name="msg" id="msg" placeholder="Message">
-    <button onclick="sendMessage()">Send</button>
+    <button onclick="eventChat()">Send</button>
 
     <p id="rawMsg"></p>
 
@@ -24,14 +24,16 @@
         var serverUrl = window.location.origin + '/';
         var socket = io(serverUrl, { 'transports': ['websocket'], 'reconnection': true, 'secure': true });
 
-        socket.on('clientMessage', (data) => {
-            console.log('client message');
-            document.getElementById('rawMsg').innerHTML += JSON.stringify(data);
-        });
-
         socket.on('showError',function(data){
             console.log("error in socket", data);
-        })
+        });
+
+        /** START for Event Chat Message */
+        socket.on('groupChat', function(data){
+            document.getElementById('rawMsg').innerHTML += JSON.stringify(data);
+        });
+        /** END for Event Chat Message */
+
         function startChat(){
             let data = {
                 'userId'    : document.getElementById("userId").value,
@@ -41,17 +43,18 @@
 
         }
 
-        function sendMessage(){
+        function eventChat(){
             let data = {
-                from: document.getElementById("userId").value,
-                to: document.getElementById("partner").value,
+                type: "EVENT", // TRIBE || EVENT
+                user_id: document.getElementById("userId").value,
+                channel_id: document.getElementById("partner").value,
                 message: document.getElementById("msg").value,
-                cid: Math.random(99),
-                name: 'dummy name'
+                cid: Math.random(99)
             };
 
-            socket.emit('message', data);
+            socket.emit('groupChat', data);
         }
+
    </script>
 
 </body>

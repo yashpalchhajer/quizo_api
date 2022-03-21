@@ -4,14 +4,6 @@ var express = require('express');
 var router = express.Router();
 
 
-const MerchanController = require('../controllers').MerchantController;
-const PlayerController = require('../controllers').PlayerController;
-const GameController = require('../controllers').GameController;
-const DashBoard = require('../controllers').DashBoardController;
-// const PlansController = require('../controllers').PlansController;
-const WalletController = require('../controllers').WalletController;
-const ProvidersController = require('../controllers').ProvidersController;
-
 const UserMasterController = require('../controllers').UserMasterController;
 /* GET home page. */
 

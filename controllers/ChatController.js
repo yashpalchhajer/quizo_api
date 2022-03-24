@@ -105,7 +105,7 @@ const handleMessage = async (req) => {
         "to"    :  messageData.recipient_id,
         "from"  : messageData.sender_id,
         "message"   :  messageData.chat_meaasge,
-        "time"  :  messageData.created_at,
+        "time"  :  new Date(messageData.created_at).getTime(),
         "cid"	:	req.cid,
         "name" : req.name
     };
@@ -196,10 +196,10 @@ const handleEventChat = async (req) =>  {
         
         let resp = {
             "type"  :  "EVENT",
-            "to"    :  req.channel_id,
-            "from"  : req.user_id,
-            "message"   :  req.message,
-            "time"  :  "",
+            "to"    :  chatData.dataValues.event_info_id,
+            "from"  : chatData.dataValues.user_id,
+            "message"   :  chatData.dataValues.message,
+            "time"  :  new Date(chatData.dataValues.created_at).getTime(),
             "sender_name"  :  senderFullName,
             "sender_profile"  :  senderProfile,
             "cid"	:	req.cid
@@ -288,10 +288,10 @@ const handleTribeChat = async (req)    =>  {
 
         let resp = {
             "type"  :  "TRIBE",
-            "to"    :  req.channel_id,
-            "from"  : req.user_id,
-            "message"   :  req.message,
-            "time"  :  "",
+            "to"    :  tribeMsg.dataValues.tribe_id,
+            "from"  : tribeMsg.dataValues.user_id,
+            "message"   :  tribeMsg.dataValues.message,
+            "time"  :  new Date(tribeMsg.dataValues.created_at).getTime(),
             "sender_name"  :  senderFullName,
             "sender_profile"  :  senderProfile,
             "cid"	:	req.cid

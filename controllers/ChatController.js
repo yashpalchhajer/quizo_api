@@ -13,6 +13,9 @@ const TribeJoinedUser = require('../models').tribe_joined_users;
 const TribeGroupChat = require('../models').tribe_group_chat;
 const UserInfo = require('../models').userinfo;
 const DateHandlers = require('../libraries/DateHandlers');
+const moment = require('moment');
+var strtotime = require('locutus/php/datetime/strtotime');
+
 const joinChat = async (req) => {
 
     let reqBody = req;
@@ -105,7 +108,8 @@ const handleMessage = async (req) => {
         "to"    :  messageData.recipient_id,
         "from"  : messageData.sender_id,
         "message"   :  messageData.chat_meaasge,
-        "time"  :  new Date(messageData.created_at).getTime(),
+        "time"  :  (strtotime(messageData.created_at) * 1000),
+        // "time"  :  moment(messageData.created_at).utc().unix(),
         "cid"	:	req.cid,
         "name" : req.name
     };
@@ -199,7 +203,7 @@ const handleEventChat = async (req) =>  {
             "to"    :  chatData.dataValues.event_info_id,
             "from"  : chatData.dataValues.user_id,
             "message"   :  chatData.dataValues.message,
-            "time"  :  new Date(chatData.dataValues.created_at).getTime(),
+            "time"  :  (strtotime(chatData.dataValues.created_at) * 1000),
             "sender_name"  :  senderFullName,
             "sender_profile"  :  senderProfile,
             "cid"	:	req.cid
@@ -291,7 +295,7 @@ const handleTribeChat = async (req)    =>  {
             "to"    :  tribeMsg.dataValues.tribe_id,
             "from"  : tribeMsg.dataValues.user_id,
             "message"   :  tribeMsg.dataValues.message,
-            "time"  :  new Date(tribeMsg.dataValues.created_at).getTime(),
+            "time"  :  (strtotime(tribeMsg.dataValues.created_at) * 1000),
             "sender_name"  :  senderFullName,
             "sender_profile"  :  senderProfile,
             "cid"	:	req.cid

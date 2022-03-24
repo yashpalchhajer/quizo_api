@@ -12,7 +12,7 @@ const GroupChat = require('../models').group_chat;
 const TribeJoinedUser = require('../models').tribe_joined_users;
 const TribeGroupChat = require('../models').tribe_group_chat;
 const UserInfo = require('../models').userinfo;
-
+const DateHandlers = require('../libraries/DateHandlers');
 const joinChat = async (req) => {
 
     let reqBody = req;
@@ -78,7 +78,8 @@ const handleMessage = async (req) => {
         'sender_id' : req.from, 
         'recipient_id' : req.to, 
         'chat_meaasge' : req.message, 
-        'message_thread_id' : threadId.thread_id
+        'message_thread_id' : threadId.thread_id,
+        'created_at': await DateHandlers.getUTCDateTime()
     };
 
     let sentMsg = await UserChatMessage.insertMessage(msgData);
@@ -156,6 +157,7 @@ const handleEventChat = async (req) =>  {
             'user_id'   :  req.user_id,
             'event_info_id'  :  req.channel_id,
 		    'message'   :  req.message,
+            'created_at': await DateHandlers.getUTCDateTime()
         };
         let chatData = await GroupChat.createMessage(msgData);
 
@@ -247,6 +249,7 @@ const handleTribeChat = async (req)    =>  {
             'user_id'   :  req.user_id,
             'tribe_id'  :  req.channel_id,
 		    'message'   :  req.message,
+            'created_at': await DateHandlers.getUTCDateTime()
         };
         // save to tribe group chat
         let tribeMsg = await TribeGroupChat.createMessage(msgData);

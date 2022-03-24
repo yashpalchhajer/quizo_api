@@ -27,6 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     is_offline_message:{
         type: DataTypes.INTEGER,
         default: 2
+    },
+    created_at:{
+      type: DataTypes.DATE
     }
   }, {
     freezeTableName: true,

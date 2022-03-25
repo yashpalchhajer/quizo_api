@@ -103,15 +103,28 @@ const handleMessage = async (req) => {
         receiverConnection = global.socketUsers[receiverPos].conn;
     }
 
+    let senderDetails = await UserInfo.getUser(messageData.sender_id);
+
+    let senderFullName = "";
+    if(senderDetails !=null ){
+        if(senderDetails.first_name != null){
+            senderFullName = senderDetails.first_name;
+        }
+
+        if(senderDetails.last_name != null){
+            senderFullName = `${senderFullName} ${senderDetails.last_name}`;
+        }
+
+    }
+
     let resp = {
         "command"   :  "message", 
         "to"    :  messageData.recipient_id,
         "from"  : messageData.sender_id,
         "message"   :  messageData.chat_meaasge,
         "time"  :  (strtotime(messageData.created_at) * 1000),
-        // "time"  :  moment(messageData.created_at).utc().unix(),
         "cid"	:	req.cid,
-        "name" : req.name
+        "name" : senderFullName
     };
 
     senderConnections = senderConnections.concat(receiverConnection);

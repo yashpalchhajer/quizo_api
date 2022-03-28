@@ -32,19 +32,15 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
 
 
-  UserMaster.setLastActive = async (userId) =>  {
+  UserMaster.setLastActive = async (id) =>  {
+
       let activeTime = await DateHandlers.addMinutes(new Date(), process.env.ACTIVE_MINUTES);
-      UserMaster.update({
-        lastActive: activeTime
-      },{
-        where: {
-          id: userId
-        }
-      }).then((res) => {
-        
-      }).catch(err => {
-        console.error("Error in Set User Active ", err);
-      });
+      console.log('without utc', activeTime);
+
+      activeTime = await DateHandlers.dateToYMD(activeTime);
+      console.log('To YDM ' , activeTime);
+
+      DateHandlers.updateTime(id, activeTime);
     
   }
 

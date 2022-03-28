@@ -9,7 +9,11 @@
 <body>
     
     <input type="text" name="userId" id="userId" placeholder="User Id" value="11221421"> <button onclick="startChat()"> Join </button>
-
+    <br>
+    <select name="channel-type" id="channel-type">
+        <option value="EVENT" selected>EVENT</option>
+        <option value="TRIBE">TRIBE</option>
+    </select>
     <br>
 
     <input type="text" name="partner" id="partner" placeholder="Group Id" value="41">
@@ -45,7 +49,7 @@
 
         function eventChat(){
             let data = {
-                type: "TRIBE", // TRIBE || EVENT
+                type: document.getElementById("channel-type").value,
                 user_id: document.getElementById("userId").value,
                 channel_id: document.getElementById("partner").value,
                 message: document.getElementById("msg").value,

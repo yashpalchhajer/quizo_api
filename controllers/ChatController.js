@@ -13,7 +13,7 @@ const TribeJoinedUser = require('../models').tribe_joined_users;
 const TribeGroupChat = require('../models').tribe_group_chat;
 const UserInfo = require('../models').userinfo;
 const DateHandlers = require('../libraries/DateHandlers');
-const moment = require('moment');
+const UserMaster = require('../models').users;
 var strtotime = require('locutus/php/datetime/strtotime');
 
 const joinChat = async (req) => {
@@ -37,7 +37,7 @@ const joinChat = async (req) => {
             conn: [reqBody.socket_id]
         });
     }
-
+    UserMaster.setLastActive(reqBody.userId);
     console.log(global.socketUsers);
 
 }
@@ -59,7 +59,7 @@ const handleMessage = async (req) => {
         global.io.to(req.socket_id).emit('showError', err);
         return false;
     }
-
+    UserMaster.setLastActive(req.from);
     // logic to check chat eligibility
     let isEglgible = await UserChatHandler.isEligibleForChat(req.from, req.to);
     if(!isEglgible){
@@ -162,6 +162,7 @@ const handleEventChat = async (req) =>  {
             return false;
         }
 
+        UserMaster.setLastActive(req.user_id);
         let isJoined = await EventJoinedUser.getJoinedId(req.user_id, req.channel_id);
 
         if(!isJoined){
@@ -253,7 +254,7 @@ const handleTribeChat = async (req)    =>  {
             global.io.to(req.socket_id).emit('showError', err);
             return false;
         }
-
+        UserMaster.setLastActive(req.user_id);
         let isJoined = await TribeJoinedUser.getJoinedId(req.user_id, req.channel_id);
 
         if(!isJoined){

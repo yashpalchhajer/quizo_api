@@ -1,5 +1,6 @@
 'use strict';
 const {TABLE_USER_MASTER} = require('../config/dbConstant');
+const DateHandlers = require('../libraries/DateHandlers');
 
 module.exports = (sequelize, DataTypes) => {
   const UserMaster = sequelize.define(TABLE_USER_MASTER, {
@@ -24,7 +25,28 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    lastActive: {
+      type: DataTypes.DATE,
+      allowNull: true
+    }
   }, {});
+
+
+  UserMaster.setLastActive = async (userId) =>  {
+      let activeTime = await DateHandlers.addMinutes(new Date(), process.env.ACTIVE_MINUTES);
+      UserMaster.update({
+        lastActive: activeTime
+      },{
+        where: {
+          id: userId
+        }
+      }).then((res) => {
+        
+      }).catch(err => {
+        console.error("Error in Set User Active ", err);
+      });
+    
+  }
 
   return UserMaster;
 };
